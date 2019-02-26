@@ -1,0 +1,6 @@
+#Ignore temp files
+~$Report.doc
+
+#Ignore virtual studio code files
+.vscodoe
+assembler/.vscode
