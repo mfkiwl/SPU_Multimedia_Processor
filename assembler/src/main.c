@@ -7,14 +7,31 @@
  * SPU Instructions and outputs to a file, the binary 
  * data associated with each instruction.
 */
-int main(int argc, char **argv) {
-    /* Get Instructions */
-    //while(!MAX_NUMBER_OF_INSTRUCTIONS) { //
-        char* instr = getInstr();
-    //}
+int main() {
+    int bytes_read; // Number of bytes read in current line
+    char* instr;
 
-    // Dont forget to free instr when done outputting all. 
+    while(bytes_read) {
+        /* Get Instructions */ 
+        if((instr = getInstr(&bytes_read)) == (char *)-1) break;// EOF reached 
 
+        /* Skip comments */
+        if(instr[0] == '#') continue;
+
+        /* Parse the read Instruction String and Output the Binary data */
+        if(parse_line(instr)) {
+            puts("Empty String!");
+            free(instr);
+            return EXIT_FAILURE;
+        }
+    }
+
+    /*  */
     free(instr);
-    return EXIT_SUCCESS;    
+    
+    if(!ferror(stdin)) return EXIT_FAILURE;  // If failure with file
+
+    if(!feof(stdin)) return EXIT_SUCCESS;    // Make sure EOF was reached
+    
+    return EXIT_FAILURE;    
 }

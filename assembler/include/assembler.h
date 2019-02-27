@@ -6,8 +6,24 @@
 // TODO: FIGURE OUT HOW MUCH THIS SHOULD BE ^
 
 /*
- * Returns: String: An Instruction
+ * Parameter(s):
+ *  - bytes_read: number of bytes read 
+ * 
+ * Returns: 
+ *  - String: An Instruction
 */
-char* getInstr();
+char* 
+getInstr(int *bytes_read);
+
+/*
+ * Parameter(s):
+ *  - instr: instruction line String
+ * 
+ * Returns: 
+ *  - 0: Successfully parsed String
+ *  - 1: Error
+*/
+int
+parse_line(char *instr);
 
 #endif /* ASSEMBLER_H */
