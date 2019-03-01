@@ -1,19 +1,22 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "assembler.h"
+#include "sort.h" 
 
 /*
  * Program reads, from a file passed to stdin, Cell
  * SPU Instructions and outputs to a file, the binary 
- * data associated with each instruction.
+ * data in the format associated with each instruction.
 */
 int main() {
-    int bytes_read; // Number of bytes read in current line
-    char* instr;
+    size_t size = MAX_INSTR_LEN; // Maximum size of Instruction String
+    char* instr =  instr = (char *) malloc(size + 1); // Instruction String (+1 for String null-terminator)
+    /* Sort Instruction Array */
+    sort_instr();
 
-    while(bytes_read) {
-        /* Get Instructions */ 
-        if((instr = getInstr(&bytes_read)) == (char *)-1) break;// EOF reached 
+    for(;;) {
+        /* Get next Instruction Line */ 
+        if((getInstr(instr, size))) break; // EOF reached 
 
         /* Skip comments */
         if(instr[0] == '#') continue;
@@ -25,13 +28,14 @@ int main() {
             return EXIT_FAILURE;
         }
     }
-
-    /*  */
+    /* Free the instruction line buffer */
     free(instr);
-    
-    if(!ferror(stdin)) return EXIT_FAILURE;  // If failure with file
 
-    if(!feof(stdin)) return EXIT_SUCCESS;    // Make sure EOF was reached
+    /* If End of File reached */
+    if(feof(stdin)) 
+        return EXIT_SUCCESS;
+    else if(ferror(stdin))
+        return EXIT_FAILURE;  
     
-    return EXIT_FAILURE;    
+    return EXIT_FAILURE;
 }

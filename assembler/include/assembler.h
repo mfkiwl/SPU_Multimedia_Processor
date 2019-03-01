@@ -8,12 +8,14 @@
 /*
  * Parameter(s):
  *  - bytes_read: number of bytes read 
+ *  - instr: The instruction read
  * 
  * Returns: 
- *  - String: An Instruction
+ *  - 0: If line was read successfully 
+ *  - 1: If failure or EOF
 */
-char* 
-getInstr(int *bytes_read);
+int 
+getInstr(char *instr, size_t size);
 
 /*
  * Parameter(s):

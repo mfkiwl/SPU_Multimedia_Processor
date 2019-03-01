@@ -5,6 +5,9 @@
 # Ignore all local history of files
 .history
 
+# Ignore my notes
+Notes.txt
+
 ### C ###
 #bin&build files
 bin/

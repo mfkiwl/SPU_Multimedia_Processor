@@ -9,19 +9,18 @@
  * 
  * Parameter(s):
  *  - bytes_read: number of bytes read 
+ *  - instr: The instruction read
+ * 
  * Returns: 
- *  - String: An Instruction
- *  - -1: If EOF reached
+ *  - 0: If line was read successfully 
+ *  - 1: If failure or EOF
 */
-char* 
-getInstr(int *bytes_read) {
-    size_t size = MAX_INSTR_LEN;      // Maximum size of Instruction String
-    char *instr = malloc(size + 1);   // Instruction String (+1 for String null-terminator)
-
+int 
+getInstr(char *instr, size_t size) {
     /* Read Instruction line from stdin. */
-    if((*bytes_read = getline(&instr, &size, stdin)) == -1) return (char *)-1; 
+    if((getline(&instr, &size, stdin)) == EOF) return 1;
 
-    return (char *)instr;
+    return 0;
 }
 
 /*
@@ -34,6 +33,8 @@ static void
 output_data() {
 
 }   
+
+
 
 /*
  * Details: Parses the instrution line retrieved using strtok
@@ -48,16 +49,23 @@ output_data() {
 */
 int
 parse_line(char *instr) {
-    char *instr_name;   // Instruction name 
+    char *token;
 
     /* Get Instruction name */
-    if(!(instr_name = strtok(instr, " "))) return 1; // Empty String
+    if(!(token = strtok(instr, " "))) return 1; // Return Error if Empty String
 
-    //printf("instr_name: %s\n", instr_name);
+    /* Search for Instruction Structure given the Insruction Name */
+    /* Find Instruction */
+    for(int i = 0; i < TOTAL_INSR; i++)
+        printf("%d:%s\n", i+1, isa_instr[i].instr_name);
+    /* Find Instruction Format given the Instruction Name */
+    //switch(enum in instr table) {
+
+    //}
     
-    //while(strtok) {
-       
-   // }
+    while((token = strtok(NULL, ", "))) {
+       // printf("%s ", token);
+    }
 
-   return 0;
+    return 0;
 }
