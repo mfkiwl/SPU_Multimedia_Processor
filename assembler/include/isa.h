@@ -2,7 +2,7 @@
 #define ISA_H
 
 /* Total number of Instructions */
-#define TOTAL_INSR 68
+#define TOTAL_INSTR 68
 
 /* Instructin Formats */
 typedef enum {
@@ -14,15 +14,52 @@ typedef enum {
     RI18    // RI18-Type
 } format;
 
+/* Binary Instruction Arrangement */
+typedef union {
+    struct {
+        unsigned RA:  7;   // Operand Register A
+        unsigned RB:  7;   // Operand Register B
+        unsigned RT:  7;   // Operand Register T
+        const unsigned op: 11;   // Unique Instruction Op-code
+    } RR_bf;
+    struct {
+        unsigned RA: 7;
+        unsigned RB: 7;
+        unsigned RC: 7;     // Operand Register C
+        unsigned RT: 7;
+        const unsigned op: 4;
+    } RRR_bf;
+    struct {
+        unsigned RI7:  7;   // Operand Immediate 7 bits
+        unsigned RA:   7;
+        unsigned RT:   7;
+        const unsigned op: 11;
+    } RI7_bf;
+    struct {
+        unsigned RI10: 10;  // Operand Immediate 10 bits
+        unsigned RA:    7;
+        unsigned RT:    7;
+        const unsigned op: 8;  
+    } RI10_bf;
+    struct {
+        unsigned RT:    7;
+        unsigned RI16: 16;  // Operand Immediate 16 bits
+        const unsigned op: 9;
+    } RI16_bf;
+    struct {
+        unsigned RT:    7;
+        unsigned RI18: 18;  // Operand Immediate 18 bits
+        const unsigned op: 7;
+    } RI18_bf;
+    unsigned instr; // Full 32-bit Instruction Binary Machine Code 
+} bin_format;
+
 /* ISA - Instruction Table */
 typedef struct {
-    /* Instruction format */
-    const format f;
-    /* Instruction Opcode */
-    const unsigned op;
-    /* Instruction Name */
-    const char *instr_name; 
+    const format f;         /* Instruction format */
+    const char *instr_name; /* Instruction Name */
+    bin_format bf;          /* Instruction Binary Arrangement */
 } isa;
-extern isa isa_instr[TOTAL_INSR];
+extern isa isa_instr[TOTAL_INSTR];
 
 #endif /* ISA_H */

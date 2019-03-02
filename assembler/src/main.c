@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include "assembler.h"
 #include "sort.h" 
+#include "isa.h"
 
 /*
  * Program reads, from a file passed to stdin, Cell
@@ -9,24 +10,27 @@
  * data in the format associated with each instruction.
 */
 int main() {
-    size_t size = MAX_INSTR_LEN; // Maximum size of Instruction String
-    char* instr =  instr = (char *) malloc(size + 1); // Instruction String (+1 for String null-terminator)
+    char *instr = (char *)malloc(MAX_INSTR_LEN + 1); // Instruction String (+1 for String null-terminator)
+    unsigned bdata; // Binary Data 
     /* Sort Instruction Array */
     sort_instr();
 
     for(;;) {
         /* Get next Instruction Line */ 
-        if((getInstr(instr, size))) break; // EOF reached 
+        if((getInstr(instr, MAX_INSTR_LEN))) break; // EOF reached 
 
         /* Skip comments */
         if(instr[0] == '#') continue;
 
-        /* Parse the read Instruction String and Output the Binary data */
-        if(parse_line(instr)) {
+        /* Parse the obtained Instruction String */
+        if(parse_line(instr, &bdata)) {
             puts("Empty String!");
             free(instr);
             return EXIT_FAILURE;
         }
+
+        /* Output the Binary data */
+        output_data(bdata);
     }
     /* Free the instruction line buffer */
     free(instr);
