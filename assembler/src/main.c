@@ -10,9 +10,10 @@
  * data in the format associated with each instruction.
 */
 int main() {
-    char *instr = (char *)malloc(MAX_INSTR_LEN + 1); // Instruction String (+1 for String null-terminator)
+    char *instr = (char *)malloc(MAX_INSTR_LEN); // Instruction String
     unsigned bdata; // Binary Data 
-    /* Sort Instruction Array */
+
+    /* Sort Instruction Table */
     sort_instr();
 
     for(;;) {
@@ -30,8 +31,9 @@ int main() {
         }
 
         /* Output the Binary data */
-        output_data(bdata);
+        //output_data(bdata);
     }
+
     /* Free the instruction line buffer */
     free(instr);
 

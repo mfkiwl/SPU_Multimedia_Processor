@@ -2,8 +2,7 @@
 #define ASSEMBLER_H
 
 /* Maximum number of characters in an Instruction Line */
-#define MAX_INSTR_LEN 100
-// TODO: FIGURE OUT HOW MUCH THIS SHOULD BE ^
+#define MAX_INSTR_LEN 25
 
 /*
  * Parameter(s):
@@ -46,7 +45,7 @@ parse_line(char *instr, unsigned *dbata);
  * Details: Output the Instruction binary data to stdout
  * 
  * Parameter(s):
- *  - instr_data: Binary data to output
+ *  - instr_data: Instruction data to be output
 */
 void 
 output_data(unsigned instr_data);

@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 #include "assembler.h"
 #include "isa.h"
 #include "sort.h"
@@ -18,8 +19,15 @@
 */
 int 
 getInstr(char *instr, size_t size) {
+    size_t buffer_size = 0;
+
     /* Read Instruction line from stdin. */
-    if((getline(&instr, &size, stdin)) == EOF) return 1;
+    if((buffer_size = getline(&instr, &size, stdin)) == EOF) return 1;
+
+    /* Get rid of newline at the end of the line read */
+    if(instr[buffer_size-1] == '\n') {
+        instr[buffer_size-1] = '\0';
+    }
 
     return 0;
 }
@@ -57,6 +65,10 @@ cmp(const void *p1, const void *p2) {
  * Details: Read the Operand String, convert them
  * to unsigned integer and fill the necessary values 
  * needed for the RR format Instruction.
+ * 
+ * Parameter(s):
+ *  - instr_ptr: Pointer to current instruction being
+ *  processed.
 */
 static void
 RR_proc(isa *instr_ptr) {
@@ -72,7 +84,8 @@ RR_proc(isa *instr_ptr) {
     } else if(!strcmp(instr_ptr->instr_name, "stop") ||
               !strcmp(instr_ptr->instr_name, "lnop") ||
               !strcmp(instr_ptr->instr_name, "nop")) {
-        return; // These Instructions does not take any arguments
+                  
+        return; // These Instructions does not have any operands
     }
 
     /* Read Operand RT */
@@ -86,14 +99,16 @@ RR_proc(isa *instr_ptr) {
     /* Read Operand RB */
     if(!(token = strtok(NULL, " ,"))) return;   
     instr_ptr->bf.RR_bf.RB = (unsigned)strtol(token, NULL, 0);
-
-    printf("0x%X", instr_ptr->bf.instr);
 }
 
 /*
  * Details: Read the Operand String, convert them
  * to unsigned integer and fill the necessary values 
  * needed for the RRR format Instruction.
+ * 
+ * Parameter(s):
+ *  - instr_ptr: Pointer to current instruction being
+ *  processed.
 */
 static void
 RRR_proc(isa *instr_ptr) {
@@ -114,14 +129,16 @@ RRR_proc(isa *instr_ptr) {
     /* Read Operand RC */
     if(!(token = strtok(NULL, " ,"))) return;   
     instr_ptr->bf.RRR_bf.RC = (unsigned)strtol(token, NULL, 0);
-
-    printf("0x%X", instr_ptr->bf.instr);
 }
 
 /*
  * Details: Read the Operand String, convert them
  * to unsigned integer and fill the necessary values 
  * needed for the RI7 format Instruction.
+ * 
+ * Parameter(s):
+ *  - instr_ptr: Pointer to current instruction being
+ *  processed.
 */
 static void
 RI7_proc(isa *instr_ptr) {
@@ -138,14 +155,16 @@ RI7_proc(isa *instr_ptr) {
     /* Read Operand I7 */
     if(!(token = strtok(NULL, " ,"))) return;   
     instr_ptr->bf.RI7_bf.RI7 = (unsigned)strtol(token, NULL, 0);
-
-    printf("0x%X", instr_ptr->bf.instr);
 }
 
 /*
  * Details: Read the Operand String, convert them
  * to unsigned integer and fill the necessary values 
  * needed for the RI10 format Instruction.
+ * 
+ * Parameter(s):
+ *  - instr_ptr: Pointer to current instruction being
+ *  processed.
 */
 static void
 RI10_proc(isa *instr_ptr) {
@@ -159,7 +178,7 @@ RI10_proc(isa *instr_ptr) {
         instr_ptr->bf.RI10_bf.RT = (unsigned)strtol(token, NULL, 0);
 
         /* Read Operand I10 */
-        if(!(token = strtok(NULL, " ,"))) return;   
+        if(!(token = strtok(NULL, " ,("))) return;   
         instr_ptr->bf.RI10_bf.RI10 = (unsigned)strtol(token, NULL, 0);
 
         /* Read Operand RA */
@@ -180,14 +199,16 @@ RI10_proc(isa *instr_ptr) {
     /* Read Operand I10 */
     if(!(token = strtok(NULL, " ,"))) return;   
     instr_ptr->bf.RI10_bf.RI10 = (unsigned)strtol(token, NULL, 0);
-
-    printf("0x%X", instr_ptr->bf.instr);
 }
 
 /*
  * Details: Read the Operand String, convert them
  * to unsigned integer and fill the necessary values 
  * needed for the RI16 format Instruction.
+ * 
+ * Parameter(s):
+ *  - instr_ptr: Pointer to current instruction being
+ *  processed.
 */
 static void
 RI16_proc(isa *instr_ptr) {
@@ -210,14 +231,16 @@ RI16_proc(isa *instr_ptr) {
     /* Read Operand I16 */
     if(!(token = strtok(NULL, " ,"))) return;   
     instr_ptr->bf.RI16_bf.RI16 = (unsigned)strtol(token, NULL, 0);
-
-    printf("0x%X", instr_ptr->bf.instr);
 }
 
 /*
  * Details: Read the Operand String, convert them
  * to unsigned integer and fill the necessary values 
  * needed for the RI18 format Instruction.
+ * 
+ * Parameter(s):
+ *  - instr_ptr: Pointer to current instruction being
+ *  processed.
 */
 static void
 RI18_proc(isa *instr_ptr) {
@@ -230,8 +253,18 @@ RI18_proc(isa *instr_ptr) {
     /* Read Operand I18 */
     if(!(token = strtok(NULL, " ,"))) return;   
     instr_ptr->bf.RI18_bf.RI18 = (unsigned)strtol(token, NULL, 0);
+}
 
-    printf("0x%X", instr_ptr->bf.instr);
+/*
+ * Details: Takes in the given String and convert 
+ * it to lowercase (regardless of orignal case).
+ * 
+ * Parameter(s):
+ *  - str: String to make lower case
+*/
+static void
+lowercase(char *str) {
+    for(;*str;++str) *str = tolower(*str);
 }
 
 /*
@@ -258,6 +291,7 @@ parse_line(char *instr, unsigned *bdata) {
 
     /* Get Instruction name */
     if(!(token = strtok(instr, " "))) return 1; // Return Error if Empty String
+    lowercase(token);
     
     /* Search for Instruction Structure given the Insruction Name */
     /* Find Instruction */

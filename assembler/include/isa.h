@@ -17,9 +17,9 @@ typedef enum {
 /* Binary Instruction Arrangement */
 typedef union {
     struct {
+        unsigned RT:  7;   // Operand Register T
         unsigned RA:  7;   // Operand Register A
         unsigned RB:  7;   // Operand Register B
-        unsigned RT:  7;   // Operand Register T
         const unsigned op: 11;   // Unique Instruction Op-code
     } RR_bf;
     struct {
@@ -30,15 +30,15 @@ typedef union {
         const unsigned op: 4;
     } RRR_bf;
     struct {
-        unsigned RI7:  7;   // Operand Immediate 7 bits
-        unsigned RA:   7;
         unsigned RT:   7;
+        unsigned RA:   7;
+        unsigned RI7:  7;   // Operand Immediate 7 bits
         const unsigned op: 11;
     } RI7_bf;
     struct {
-        unsigned RI10: 10;  // Operand Immediate 10 bits
-        unsigned RA:    7;
         unsigned RT:    7;
+        unsigned RA:    7;
+        unsigned RI10: 10;  // Operand Immediate 10 bits
         const unsigned op: 8;  
     } RI10_bf;
     struct {

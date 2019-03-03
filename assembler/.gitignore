@@ -1,7 +1,6 @@
-### VisualStudioCode ###
+#################### Visual Studio Code ####################
 .vscode/*
 
-### VisualStudioCode Patch ###
 # Ignore all local history of files
 .history
 
@@ -9,7 +8,7 @@
 Notes.txt
 
 ### C ###
-#bin&build files
+# bin & build Directories
 bin/
 build/
 
