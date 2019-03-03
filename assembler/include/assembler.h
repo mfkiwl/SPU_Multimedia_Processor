@@ -2,12 +2,12 @@
 #define ASSEMBLER_H
 
 /* Maximum number of characters in an Instruction Line */
-#define MAX_INSTR_LEN 25
+#define MAX_INSTR_LEN 35
 
 /*
  * Parameter(s):
- *  - bytes_read: number of bytes read 
  *  - instr: The instruction read
+ *  - size: number of bytes to read 
  * 
  * Returns: 
  *  - 0: If line was read successfully 
@@ -39,7 +39,7 @@ cmp(const void *p1, const void *p2);
  *  - 1: Error
 */
 int
-parse_line(char *instr, unsigned *dbata);
+parse_line(char *instr, unsigned **dbata);
 
 /*
  * Details: Output the Instruction binary data to stdout
@@ -48,6 +48,6 @@ parse_line(char *instr, unsigned *dbata);
  *  - instr_data: Instruction data to be output
 */
 void 
-output_data(unsigned instr_data);
+output_data(unsigned *instr_data);
 
 #endif /* ASSEMBLER_H */

@@ -11,7 +11,7 @@
  * 
  * Parameter(s):
  *  - bytes_read: number of bytes read 
- *  - instr: The instruction read
+ *  - size: number of bytes to read 
  * 
  * Returns: 
  *  - 0: If line was read successfully 
@@ -39,8 +39,8 @@ getInstr(char *instr, size_t size) {
  *  - instr_data: Binary data to output
 */
 void 
-output_data(unsigned instr_data) {
-
+output_data(unsigned *instr_data) {
+    printf("0x%08X\n", *instr_data);
 }   
 
 /* 
@@ -280,7 +280,7 @@ lowercase(char *str) {
  *  - 1: Error
 */
 int
-parse_line(char *instr, unsigned *bdata) {
+parse_line(char *instr, unsigned **bdata) {
     char *token;
     /*
         Intermediary isa Structure to hold the name 
@@ -320,6 +320,9 @@ parse_line(char *instr, unsigned *bdata) {
             RI18_proc(instr_ptr);
             break;
     }
+
+    /* Get the data value */
+    *bdata = &instr_ptr->bf.instr;
 
     return 0;
 }

@@ -1,4 +1,4 @@
-# Test All Instructions
+# Test all Instructions
 LQA 127, 0xFFFF
 lqd 127, 0x3FF(127)
 stqd 127, 0x3FF(127)

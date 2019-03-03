@@ -11,7 +11,7 @@
 */
 int main() {
     char *instr = (char *)malloc(MAX_INSTR_LEN); // Instruction String
-    unsigned bdata; // Binary Data 
+    unsigned *bdata = NULL; // Binary Data 
 
     /* Sort Instruction Table */
     sort_instr();
@@ -31,7 +31,7 @@ int main() {
         }
 
         /* Output the Binary data */
-        //output_data(bdata);
+        output_data(bdata);
     }
 
     /* Free the instruction line buffer */
