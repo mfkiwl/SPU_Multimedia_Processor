@@ -16,6 +16,7 @@
 !.gitignore
 !assembler/rsrc/*
 !assembler/output/*
+!assembler/imgs/*
 ##############
 #Source files:
 ##############

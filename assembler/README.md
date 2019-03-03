@@ -1,17 +1,18 @@
+
 #  SPU Assembler
 
 > The program Assembles as specific subset of Instructions of the Sony Cell SPU.
 
 ## Instruction Subset
-![](https://lh3.googleusercontent.com/YKMigrXyF8M1zVWFIb2YStBAbJhMpquCyuOglpOkpXR_X6bahAH6EUEjMX5DFMDcy0TY0FcSaMK1 "Simple Fixed 1")
-![](https://lh3.googleusercontent.com/wTw13lJrS1GvlJRoB230D0yuuDH36MWjBIqp31L8BE2dCsT2yrpH_899KQ_swW6sXTQIY42cZwk- "Simple Fixed 2")
-![](https://lh3.googleusercontent.com/6ygWkhpbslnwoatpQOdkxNB6gZoZ45r2tTxvMQYvk94mktnzkeyWKHdP0rhEY6PohbEPbtvkyjE9 "Floating Point")
-![](https://lh3.googleusercontent.com/gKXrUoOZbngvsWWhamML4TiMm9uLBypBxfeE8-KWq84YPSgdkQe3fygsjkFlBXzIqsgAf5CyB_2M "Floating Point Integer")
-![](https://lh3.googleusercontent.com/47664ZA8aEtGQA_gMU_7xkt9GBFY3u0Dzi01jqg5tJDMTWNNNzRh5nmyi6w-NyLZNTj67y-l1VW3 "Local Store")
-![enter image description here](https://lh3.googleusercontent.com/e0Y9LMPj5bq-JI7JKUX_e7DHitaaP_1FDQNYt26c7TuhOZVcp8Msso9uf_fzw4MvB2OdbMSsj1UQ "Permute")
-![](https://lh3.googleusercontent.com/hYMfVwU4hSlAvMPfU3n5lv-LwA-TYFU5vC92VC51BWHrRMeJGY-qCXQR-IHmIDu4U9EDUDiU0HRy "Byte")
-![](https://lh3.googleusercontent.com/TaPGeZfARS1bwIiPA4JkR_wsZdoEiXOZ-C2YEnd18nEQNjXXttVRWzdI35dgTloIMDV2UMBxbVck "Branch")
-![](https://lh3.googleusercontent.com/W2WKQC30-OUe6ZlYdxUjOJJUamfm_Pi-edRmnGBCWscRG2q3d4_jNDT3joSrFcY4uUg1lsxW7ND7 "Control")
+![](imgs/1_simple-fixed-1.jpg "Simple Fixed 1")
+![](imgs/2_simple-fixed-2.jpg "Simple Fixed 2")
+![](imgs/3_floatin_point.PNG "Floating Point")
+![](imgs/4_floating_point_int.PNG "Floating Point Integer")
+![](imgs/5_byte.PNG "Local Store")
+![](imgs/6_local_store.PNG "Permute")
+![](imgs/7_permute.PNG "Byte")
+![](imgs/8_Branch.PNG "Branch")
+![](imgs/9_control.PNG "Control")
 
 ## Usage example
 ```
