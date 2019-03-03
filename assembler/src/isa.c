@@ -6,7 +6,7 @@ isa isa_instr[TOTAL_INSTR] = {
     {.instr_name = "lqd", .bf.RI10_bf.op = 0x34, .f = RI10},       // Load Quadword (d-form)
     {.instr_name = "stqd", .bf.RI10_bf.op = 0x24, .f = RI10},      // Store Quadword (d-form)
     {.instr_name = "stqa", .bf.RI16_bf.op = 0x41, .f = RI16},      // Store Quadword (a-form)  
-    {.instr_name = "rib", .bf.RR_bf.op = 0x3, .f = RR},            // Read Instruction Block
+    {.instr_name = "rib", .bf.RI18_bf.op = 0x23, .f = RI18},       // Read Instruction Block
     {.instr_name = "ilhu", .bf.RI16_bf.op = 0x82, .f = RI16},      // Immediate Load Halfword Upper
     {.instr_name = "il", .bf.RI16_bf.op = 0x81, .f = RI16},        // Immediate Load Word
     {.instr_name = "ila", .bf.RI18_bf.op = 0x21, .f = RI18},       // Immediate Load Address  

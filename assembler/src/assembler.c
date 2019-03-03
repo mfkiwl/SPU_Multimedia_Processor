@@ -214,7 +214,7 @@ static void
 RI16_proc(isa *instr_ptr) {
     char *token;
 
-    /* Take care of special cases */
+    /* Take care of special case */
     if(!strcmp(instr_ptr->instr_name, "br") || 
        !strcmp(instr_ptr->instr_name, "bra")) {
         /* Read Operand I16 */
@@ -245,6 +245,15 @@ RI16_proc(isa *instr_ptr) {
 static void
 RI18_proc(isa *instr_ptr) {
     char *token;
+
+    /* Take care of special case */
+    if(!strcmp(instr_ptr->instr_name, "rib")) {
+        /* Read Operand I18 */
+        if(!(token = strtok(NULL, " ,"))) return;   
+        instr_ptr->bf.RI18_bf.RI18 = (unsigned)strtol(token, NULL, 0);
+
+        return;
+    }
     
     /* Read Operand RT */
     if(!(token = strtok(NULL, " ,"))) return;   

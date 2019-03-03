@@ -6,7 +6,7 @@
 
 /*
  * Program reads, from a file passed to stdin, Cell
- * SPU Instructions and outputs to a file, the binary 
+ * SPU ASM Instructions and, outputs to a file, the binary 
  * data in the format associated with each instruction.
 */
 int main() {
