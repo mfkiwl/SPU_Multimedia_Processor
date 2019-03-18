@@ -13,6 +13,7 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
+use work.COMPONENTS_PACKAGE.ALL; -- SPU Core Components
 
 -------------------- ENTITY DEFINITION --------------------
 entity local_store_TB is
@@ -26,18 +27,6 @@ end local_store_TB;
 
 -------------------- ARCHITECTURE DEFINITION --------------------
 architecture behavioral of local_store_TB is
------ COMPONENT DECLERATION OF UUT -----
-component local_store 
-    port (
-        WE : in STD_LOGIC; 
-        RIB : in STD_LOGIC; 
-        ADDR : in STD_LOGIC_VECTOR((ADDR_WIDTH-1) downto 0);    
-        DATA_IN : in STD_LOGIC_VECTOR((DATA_WIDTH-1) downto 0);
-        DATA_OUT : out STD_LOGIC_VECTOR((DATA_WIDTH-1) downto 0);     
-        INSTR_BLOCK_OUT : out STD_LOGIC_VECTOR((INSTR_WIDTH-1) downto 0)  
-    );
-end component;
-
 ----- INPUTS -----
 signal WE : STD_LOGIC := '0'; 
 signal RIB : STD_LOGIC := '0'; 
@@ -78,10 +67,15 @@ begin
         ----- Write to Instruction Section & Read Instructin Block -----
         WE <= '1'; -- Enable Write Enable Control Signal
         ADDR <= STD_LOGIC_VECTOR(to_unsigned(0, ADDR'length));
-        DATA_IN <= x"DEAD_BEEF_DEAF_DEED_FACE_CAFE_DEED_C0DE";
-        ADDR <= STD_LOGIC_VECTOR(to_unsigned(8, ADDR'length));
-        DATA_IN <= x"F00D_C0FFEE_DAD_A_FADE_FEED_BABE_ABED_AD";
+        DATA_IN <= x"DEAD_BEEF_DEAF_DEED_FACE_CAFE_DEED_C0DE";  -- 1st Block: First 16 "Instructions"
         wait for DELAY;
+        ADDR <= STD_LOGIC_VECTOR(to_unsigned(8, ADDR'length));
+        DATA_IN <= x"F00D_C0FFEE_DAD_A_FADE_FEED_BABE_ABED_AD"; -- 2nd Block: Next 16 "Instructions"
+        wait for DELAY;
+        ADDR <= STD_LOGIC_VECTOR(to_unsigned(9, ADDR'length));
+        DATA_IN <= x"DEAD_BEEF_DEAF_DEED_FACE_CAFE_DEED_C0DE";  -- 2nd Block: Next 16 "Instructions"
+        wait for DELAY;
+        WE <= '0'; -- Disable Write Enable Control Signal
         RIB <= '1'; -- Read the first 128-Byte 
         wait for DELAY;
         RIB <= '0';

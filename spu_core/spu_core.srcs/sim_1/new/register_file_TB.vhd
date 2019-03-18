@@ -12,7 +12,8 @@
 -------------------- LIBRARIES --------------------
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
-use IEEE.NUMERIC_STD.ALL;
+use IEEE.NUMERIC_STD.ALL; 
+use work.COMPONENTS_PACKAGE.ALL; -- SPU Core Components
 
 -------------------- ENTITY DEFINITION --------------------
 entity register_file_TB is
@@ -24,31 +25,6 @@ end register_file_TB;
 
 -------------------- ARCHITECTURE DEFINITION --------------------
 architecture behavioral of register_file_TB is
------ COMPONENT DECLERATION OF UUT -----
-component register_file 
-    port (
-        CLK : in STD_LOGIC;
-        RW_EVEN : in STD_LOGIC;
-        RW_ODD : in STD_LOGIC;
-        RA_EVEN_ADDR : in STD_LOGIC_VECTOR((ADDR_WIDTH-1) downto 0);
-        RB_EVEN_ADDR : in STD_LOGIC_VECTOR((ADDR_WIDTH-1) downto 0);
-        RC_EVEN_ADDR : in STD_LOGIC_VECTOR((ADDR_WIDTH-1) downto 0);
-        EVEN_WB_ADDR : in STD_LOGIC_VECTOR((ADDR_WIDTH-1) downto 0);
-        EVEN_WB_DATA_IN : in STD_LOGIC_VECTOR((DATA_WIDTH-1) downto 0);
-        RA_ODD_ADDR : in STD_LOGIC_VECTOR((ADDR_WIDTH-1) downto 0); 
-        RB_ODD_ADDR : in STD_LOGIC_VECTOR((ADDR_WIDTH-1) downto 0);
-        RC_ODD_ADDR : in STD_LOGIC_VECTOR((ADDR_WIDTH-1) downto 0);
-        ODD_WB_ADDR : in STD_LOGIC_VECTOR((ADDR_WIDTH-1) downto 0);
-        ODD_WB_DATA_IN : in STD_LOGIC_VECTOR((DATA_WIDTH-1) downto 0);
-        RA_EVEN_DATA_OUT : out STD_LOGIC_VECTOR((DATA_WIDTH-1) downto 0); 
-        RB_EVEN_DATA_OUT : out STD_LOGIC_VECTOR((DATA_WIDTH-1) downto 0);
-        RC_EVEN_DATA_OUT : out STD_LOGIC_VECTOR((DATA_WIDTH-1) downto 0);
-        RA_ODD_DATA_OUT : out STD_LOGIC_VECTOR((DATA_WIDTH-1) downto 0);  
-        RB_ODD_DATA_OUT : out STD_LOGIC_VECTOR((DATA_WIDTH-1) downto 0); 
-        RC_ODD_DATA_OUT : out STD_LOGIC_VECTOR((DATA_WIDTH-1) downto 0)  
-    );
-end component;
-
 ----- INPUTS -----
 signal CLK : STD_LOGIC := '1';
 signal RW_EVEN : STD_LOGIC := '0';

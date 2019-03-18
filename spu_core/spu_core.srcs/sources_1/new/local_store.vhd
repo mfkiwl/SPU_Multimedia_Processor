@@ -7,7 +7,7 @@
 -- Tool versions: Vivado v2018.3 (64-bit)
 -- Description:
 --     Local storage memory used to hold the code and data.
---     It is a 32 kB - Byte Addressable Single port SRAM. 
+--     It is a 32 kB, 16-Byte Addressable Single port SRAM.
 --     16B of data can be Stored or Read at a time using Load/Store Instructions.
 --     When the Instruction Line buffer is empty a 128-Byte block is read and sent
 --     directly to the buffer. 
