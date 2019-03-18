@@ -14,9 +14,17 @@
 *
 !*/
 !.gitignore
-!assembler/rsrc/*
-!assembler/output/*
-!assembler/imgs/*
+###########
+#Assembler:
+###########
+!*.out
+!*.asm
+!*.jpg
+!*.PNG
+##################
+#REPORT RESOURCES:
+##################
+!Synergetic Processor Block Diagram.xml
 ##############
 #Source files:
 ##############
