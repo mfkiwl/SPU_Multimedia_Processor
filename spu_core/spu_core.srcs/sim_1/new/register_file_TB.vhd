@@ -18,34 +18,67 @@ use work.COMPONENTS_PACKAGE.ALL; -- SPU Core Components
 -------------------- ENTITY DEFINITION --------------------
 entity register_file_TB is
 generic (
-   ADDR_WIDTH : INTEGER := 7;  -- Bit-width of the Register Addresses 
-   DATA_WIDTH : INTEGER := 128 -- Bit-width of the Register Data
+   ADDR_WIDTH : NATURAL := 7;   -- Bit-width of the Register Addresses 
+   DATA_WIDTH : NATURAL := 128; -- Bit-width of the Register Data
+   OPCODE_WIDTH : NATURAL := 11;-- Maximum Bit-width of Opcode
+   RI7_WIDTH : NATURAL := 7;   -- Immediate 7-bit format
+   RI10_WIDTH : NATURAL := 10; -- Immediate 10-bit format
+   RI16_WIDTH : NATURAL := 16; -- Immediate 16-bit format
+   RI18_WIDTH : NATURAL := 18  -- Immediate 18-bit format
 );
 end register_file_TB;
 
 -------------------- ARCHITECTURE DEFINITION --------------------
 architecture behavioral of register_file_TB is
------ INPUTS -----
-signal CLK : STD_LOGIC := '1';
+-------------------- INPUTS --------------------
+signal CLK : STD_LOGIC := '1';    
 signal RW_EVEN : STD_LOGIC := '0';
-signal RW_ODD : STD_LOGIC := '0';
+signal RW_ODD : STD_LOGIC := '0'; 
+signal EVEN_OPCODE : STD_LOGIC_VECTOR((OPCODE_WIDTH-1) downto 0) := (others => '0');
 signal RA_EVEN_ADDR : STD_LOGIC_VECTOR((ADDR_WIDTH-1) downto 0) := (others => '0');
-signal RB_EVEN_ADDR : STD_LOGIC_VECTOR((ADDR_WIDTH-1) downto 0) := (others => '0');
-signal RC_EVEN_ADDR : STD_LOGIC_VECTOR((ADDR_WIDTH-1) downto 0) := (others => '0');
-signal EVEN_WB_ADDR : STD_LOGIC_VECTOR((ADDR_WIDTH-1) downto 0) := (others => '0');
-signal EVEN_WB_DATA_IN : STD_LOGIC_VECTOR((DATA_WIDTH-1) downto 0) := (others => '0');
-signal RA_ODD_ADDR : STD_LOGIC_VECTOR((ADDR_WIDTH-1) downto 0) := (others => '0'); 
-signal RB_ODD_ADDR : STD_LOGIC_VECTOR((ADDR_WIDTH-1) downto 0) := (others => '0');
-signal RC_ODD_ADDR : STD_LOGIC_VECTOR((ADDR_WIDTH-1) downto 0) := (others => '0');
-signal ODD_WB_ADDR : STD_LOGIC_VECTOR((ADDR_WIDTH-1) downto 0) := (others => '0');
-signal ODD_WB_DATA_IN : STD_LOGIC_VECTOR((DATA_WIDTH-1) downto 0) := (others => '0');
------ OUTPUTS -----
-signal RA_EVEN_DATA_OUT : STD_LOGIC_VECTOR((DATA_WIDTH-1) downto 0); 
-signal RB_EVEN_DATA_OUT : STD_LOGIC_VECTOR((DATA_WIDTH-1) downto 0);
-signal RC_EVEN_DATA_OUT : STD_LOGIC_VECTOR((DATA_WIDTH-1) downto 0);
-signal RA_ODD_DATA_OUT : STD_LOGIC_VECTOR((DATA_WIDTH-1) downto 0);  
-signal RB_ODD_DATA_OUT : STD_LOGIC_VECTOR((DATA_WIDTH-1) downto 0); 
-signal RC_ODD_DATA_OUT : STD_LOGIC_VECTOR((DATA_WIDTH-1) downto 0);  
+signal RB_EVEN_ADDR : STD_LOGIC_VECTOR((ADDR_WIDTH-1) downto 0) := (others => '0'); 
+signal RC_EVEN_ADDR : STD_LOGIC_VECTOR((ADDR_WIDTH-1) downto 0) := (others => '0'); 
+signal EVEN_WB_ADDR : STD_LOGIC_VECTOR((ADDR_WIDTH-1) downto 0) := (others => '0'); 
+signal EVEN_WB_DATA : STD_LOGIC_VECTOR((DATA_WIDTH-1) downto 0) := (others => '0');
+signal ODD_OPCODE : STD_LOGIC_VECTOR((OPCODE_WIDTH-1) downto 0) := (others => '0');
+signal RA_ODD_ADDR : STD_LOGIC_VECTOR((ADDR_WIDTH-1) downto 0) := (others => '0');  
+signal RB_ODD_ADDR : STD_LOGIC_VECTOR((ADDR_WIDTH-1) downto 0) := (others => '0');  
+signal RC_ODD_ADDR : STD_LOGIC_VECTOR((ADDR_WIDTH-1) downto 0) := (others => '0'); 
+signal ODD_WB_ADDR : STD_LOGIC_VECTOR((ADDR_WIDTH-1) downto 0) := (others => '0');  
+signal ODD_WB_DATA : STD_LOGIC_VECTOR((DATA_WIDTH-1) downto 0) := (others => '0');
+signal EVEN_RI7 : STD_LOGIC_VECTOR((RI7_WIDTH-1) downto 0) := (others => '0');     
+signal EVEN_RI10 : STD_LOGIC_VECTOR((RI10_WIDTH-1) downto 0) := (others => '0');  
+signal EVEN_RI16 : STD_LOGIC_VECTOR((RI16_WIDTH-1) downto 0) := (others => '0');  
+signal ODD_RI7 : STD_LOGIC_VECTOR((RI18_WIDTH-1) downto 0) := (others => '0');     
+signal ODD_RI10 : STD_LOGIC_VECTOR((RI10_WIDTH-1) downto 0) := (others => '0');
+signal ODD_RI16 : STD_LOGIC_VECTOR((RI16_WIDTH-1) downto 0) := (others => '0');    
+signal ODD_RI18 : STD_LOGIC_VECTOR((RI18_WIDTH-1) downto 0) := (others => '0');
+signal EVEN_REG_DEST : STD_LOGIC_VECTOR((ADDR_WIDTH-1) downto 0) := (others => '0');
+signal ODD_REG_DEST : STD_LOGIC_VECTOR((ADDR_WIDTH-1) downto 0) := (others => '0'); 
+-------------------- OUTPUTS --------------------
+signal EVEN_OPCODE_OUT : STD_LOGIC_VECTOR((OPCODE_WIDTH-1) downto 0) := (others => '0'); 
+signal RA_EVEN_DATA_OUT : STD_LOGIC_VECTOR((DATA_WIDTH-1) downto 0) := (others => '0'); 
+signal RB_EVEN_DATA_OUT : STD_LOGIC_VECTOR((DATA_WIDTH-1) downto 0) := (others => '0'); 
+signal RC_EVEN_DATA_OUT : STD_LOGIC_VECTOR((DATA_WIDTH-1) downto 0) := (others => '0');
+signal ODD_OPCODE_OUT : STD_LOGIC_VECTOR((OPCODE_WIDTH-1) downto 0) := (others => '0'); 
+signal RA_ODD_DATA_OUT : STD_LOGIC_VECTOR((DATA_WIDTH-1) downto 0) := (others => '0'); 
+signal RB_ODD_DATA_OUT : STD_LOGIC_VECTOR((DATA_WIDTH-1) downto 0) := (others => '0'); 
+signal RC_ODD_DATA_OUT : STD_LOGIC_VECTOR((DATA_WIDTH-1) downto 0) := (others => '0'); 
+signal RA_EVEN_ADDR_OUT : STD_LOGIC_VECTOR((ADDR_WIDTH-1) downto 0) := (others => '0'); 
+signal RB_EVEN_ADDR_OUT : STD_LOGIC_VECTOR((ADDR_WIDTH-1) downto 0) := (others => '0'); 
+signal RC_EVEN_ADDR_OUT : STD_LOGIC_VECTOR((ADDR_WIDTH-1) downto 0) := (others => '0'); 
+signal RA_ODD_ADDR_OUT : STD_LOGIC_VECTOR((ADDR_WIDTH-1) downto 0) := (others => '0'); 
+signal RB_ODD_ADDR_OUT : STD_LOGIC_VECTOR((ADDR_WIDTH-1) downto 0) := (others => '0');  
+signal RC_ODD_ADDR_OUT : STD_LOGIC_VECTOR((ADDR_WIDTH-1) downto 0) := (others => '0'); 
+signal EVEN_RI7_OUT : STD_LOGIC_VECTOR((RI7_WIDTH-1) downto 0) := (others => '0');     
+signal EVEN_RI10_OUT : STD_LOGIC_VECTOR((RI10_WIDTH-1) downto 0) := (others => '0');   
+signal EVEN_RI16_OUT : STD_LOGIC_VECTOR((RI16_WIDTH-1) downto 0) := (others => '0');    
+signal ODD_RI7_OUT : STD_LOGIC_VECTOR((RI18_WIDTH-1) downto 0) := (others => '0');      
+signal ODD_RI10_OUT : STD_LOGIC_VECTOR((RI10_WIDTH-1) downto 0) := (others => '0');    
+signal ODD_RI16_OUT : STD_LOGIC_VECTOR((RI16_WIDTH-1) downto 0) := (others => '0');   
+signal ODD_RI18_OUT : STD_LOGIC_VECTOR((RI18_WIDTH-1) downto 0) := (others => '0'); 
+signal EVEN_REG_DEST_OUT : STD_LOGIC_VECTOR((ADDR_WIDTH-1) downto 0) := (others => '0'); 
+signal ODD_REG_DEST_OUT : STD_LOGIC_VECTOR((ADDR_WIDTH-1) downto 0) := (others => '0');  
 ----- CLOCK PERIOD -----
 constant CLK_PERIOD : TIME := 10ns;
 begin
@@ -54,22 +87,50 @@ begin
         CLK => CLK,
         RW_EVEN => RW_EVEN,
         RW_ODD => RW_ODD,
+        EVEN_OPCODE => EVEN_OPCODE,
         RA_EVEN_ADDR => RA_EVEN_ADDR,
         RB_EVEN_ADDR => RB_EVEN_ADDR,
         RC_EVEN_ADDR => RC_EVEN_ADDR,
         EVEN_WB_ADDR => EVEN_WB_ADDR,
-        EVEN_WB_DATA_IN => EVEN_WB_DATA_IN,
+        EVEN_WB_DATA => EVEN_WB_DATA,
+        ODD_OPCODE => ODD_OPCODE,
         RA_ODD_ADDR => RA_ODD_ADDR,
         RB_ODD_ADDR => RB_ODD_ADDR,
         RC_ODD_ADDR => RC_ODD_ADDR,
         ODD_WB_ADDR => ODD_WB_ADDR,
-        ODD_WB_DATA_IN => ODD_WB_DATA_IN,
+        ODD_WB_DATA => ODD_WB_DATA,
+        EVEN_RI7 => EVEN_RI7, 
+        EVEN_RI10 => EVEN_RI10,
+        EVEN_RI16 => EVEN_RI16,
+        ODD_RI7 => ODD_RI7,
+        ODD_RI10 => ODD_RI10,
+        ODD_RI16 => ODD_RI16,
+        ODD_RI18 => ODD_RI18,
+        EVEN_REG_DEST => EVEN_REG_DEST,
+        ODD_REG_DEST => ODD_REG_DEST,
+        EVEN_OPCODE_OUT => EVEN_OPCODE_OUT,
         RA_EVEN_DATA_OUT => RA_EVEN_DATA_OUT,
         RB_EVEN_DATA_OUT => RB_EVEN_DATA_OUT,
         RC_EVEN_DATA_OUT => RC_EVEN_DATA_OUT,
+        ODD_OPCODE_OUT => ODD_OPCODE_OUT,
         RA_ODD_DATA_OUT => RA_ODD_DATA_OUT,
         RB_ODD_DATA_OUT => RB_ODD_DATA_OUT,
-        RC_ODD_DATA_OUT => RC_ODD_DATA_OUT
+        RC_ODD_DATA_OUT => RC_ODD_DATA_OUT,
+        RA_EVEN_ADDR_OUT => RA_EVEN_ADDR_OUT,
+        RB_EVEN_ADDR_OUT => RB_EVEN_ADDR_OUT,
+        RC_EVEN_ADDR_OUT => RC_EVEN_ADDR_OUT,
+        RA_ODD_ADDR_OUT => RA_ODD_ADDR_OUT,
+        RB_ODD_ADDR_OUT => RB_ODD_ADDR_OUT,
+        RC_ODD_ADDR_OUT => RC_ODD_ADDR_OUT,
+        EVEN_RI7_OUT => EVEN_RI7_OUT,
+        EVEN_RI10_OUT => EVEN_RI10_OUT,
+        EVEN_RI16_OUT => EVEN_RI16_OUT,
+        ODD_RI7_OUT => ODD_RI7_OUT,
+        ODD_RI10_OUT => ODD_RI10_OUT,
+        ODD_RI16_OUT => ODD_RI16_OUT,
+        ODD_RI18_OUT => ODD_RI18_OUT,
+        EVEN_REG_DEST_OUT => EVEN_REG_DEST_OUT,
+        ODD_REG_DEST_OUT => ODD_REG_DEST_OUT
     );
     
     -------------------- CLK GENERATION PROCESS --------------------

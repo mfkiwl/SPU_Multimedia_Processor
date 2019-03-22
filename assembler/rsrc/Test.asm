@@ -3,7 +3,7 @@ LQA 127, 0xFFFF
 lqd 127, 0x3FF(127)
 stqd 127, 0x3FF(127)
 stqa 127, 0xFFFF
-rib 0x3FFFF
+rib
 ilhu 127, 0xFFFF
 il 127, 0xFFFF
 ila 127, 0x3FFFF

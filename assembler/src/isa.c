@@ -5,8 +5,8 @@ isa isa_instr[TOTAL_INSTR] = {
     {.instr_name = "lqa", .bf.RI16_bf.op = 0x61, .f = RI16},       // Load Quadword (a-form)
     {.instr_name = "lqd", .bf.RI10_bf.op = 0x34, .f = RI10},       // Load Quadword (d-form)
     {.instr_name = "stqd", .bf.RI10_bf.op = 0x24, .f = RI10},      // Store Quadword (d-form)
-    {.instr_name = "stqa", .bf.RI16_bf.op = 0x41, .f = RI16},      // Store Quadword (a-form)  
-    {.instr_name = "rib", .bf.RI18_bf.op = 0x23, .f = RI18},       // Read Instruction Block
+    {.instr_name = "stqa", .bf.RI16_bf.op = 0x51, .f = RI16},      // Store Quadword (a-form)  
+    {.instr_name = "rib", .bf.RR_bf.op = 0x23, .f = RR},           // Read Instruction Block
     {.instr_name = "ilhu", .bf.RI16_bf.op = 0x82, .f = RI16},      // Immediate Load Halfword Upper
     {.instr_name = "il", .bf.RI16_bf.op = 0x81, .f = RI16},        // Immediate Load Word
     {.instr_name = "ila", .bf.RI18_bf.op = 0x21, .f = RI18},       // Immediate Load Address  
@@ -14,7 +14,7 @@ isa isa_instr[TOTAL_INSTR] = {
     {.instr_name = "a", .bf.RR_bf.op = 0xC0, .f = RR},             // Add Word 
     {.instr_name = "ai", .bf.RI10_bf.op = 0x1C, .f = RI10},        // Add Word Immediate 
     {.instr_name = "sf", .bf.RR_bf.op = 0x40, .f = RR},            // Subtract from Word
-    {.instr_name = "sfi", .bf.RI10_bf.op = 0xC, .f = RI10},        // Subtract from Word Immediate    
+    {.instr_name = "sfi", .bf.RI10_bf.op = 0xFC, .f = RI10},        // Subtract from Word Immediate    
     {.instr_name = "clz", .bf.RR_bf.op = 0x2A5, .f = RR},          // Count Leading Zeros
     {.instr_name = "and", .bf.RR_bf.op = 0xC1, .f = RR},           // And
     {.instr_name = "andc", .bf.RR_bf.op = 0x2C1, .f = RR},         // And with Complement
@@ -48,7 +48,7 @@ isa isa_instr[TOTAL_INSTR] = {
     {.instr_name = "rotqbyi", .bf.RI7_bf.op = 0x1FC, .f = RI7},    // Rotate Quadword by Bytes Immediate
     {.instr_name = "rotqbii", .bf.RI7_bf.op = 0x1F8, .f = RI7},    // Rotate Quadword by Bits Immediate
     {.instr_name = "shli", .bf.RI7_bf.op = 0x7B, .f = RI7},        // Shift Left Word Immediate
-    {.instr_name = "rothi", .bf.RI7_bf.op = 0x7C, .f = RI7},       // Rotate Halfword Immediate
+    {.instr_name = "rothi", .bf.RI7_bf.op = 0x8C, .f = RI7},       // Rotate Halfword Immediate
     {.instr_name = "roti", .bf.RI7_bf.op = 0x78, .f = RI7},        // Rotate Word Immediate
     {.instr_name = "br", .bf.RI16_bf.op = 0x64, .f = RI16},        // Branch Relative
     {.instr_name = "bra", .bf.RI16_bf.op = 0x60, .f = RI16},       // Branch Absolute 

@@ -83,7 +83,8 @@ RR_proc(isa *instr_ptr) {
         return;
     } else if(!strcmp(instr_ptr->instr_name, "stop") ||
               !strcmp(instr_ptr->instr_name, "lnop") ||
-              !strcmp(instr_ptr->instr_name, "nop")) {
+              !strcmp(instr_ptr->instr_name, "nop")  ||
+              !strcmp(instr_ptr->instr_name, "rib")) {
                   
         return; // These Instructions does not have any operands
     }
@@ -245,15 +246,6 @@ RI16_proc(isa *instr_ptr) {
 static void
 RI18_proc(isa *instr_ptr) {
     char *token;
-
-    /* Take care of special case */
-    if(!strcmp(instr_ptr->instr_name, "rib")) {
-        /* Read Operand I18 */
-        if(!(token = strtok(NULL, " ,"))) return;   
-        instr_ptr->bf.RI18_bf.RI18 = (unsigned)strtol(token, NULL, 0);
-
-        return;
-    }
     
     /* Read Operand RT */
     if(!(token = strtok(NULL, " ,"))) return;   

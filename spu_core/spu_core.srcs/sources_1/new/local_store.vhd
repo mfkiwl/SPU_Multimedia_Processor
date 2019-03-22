@@ -23,20 +23,20 @@ use IEEE.STD_LOGIC_UNSIGNED.ALL;
 -------------------- ENTITY DEFINITION --------------------
 entity local_store is
 generic (
-    STORAGE_SIZE : INTEGER := 2048;  -- Block number
-    ADDR_WIDTH : INTEGER := 15;      -- Bit-width of the SRAM Addresses 
-    DATA_WIDTH : INTEGER := 128;     -- Bit-width of the Data
-    INSTR_WIDTH : INTEGER := 1024    -- Bit-width of Instruction Block
+    STORAGE_SIZE : NATURAL := 2048;  -- Block number
+    ADDR_WIDTH : NATURAL := 15;      -- Bit-width of the SRAM Addresses 
+    DATA_WIDTH : NATURAL := 128;     -- Bit-width of the Data
+    INSTR_WIDTH : NATURAL := 1024    -- Bit-width of Instruction Block
 );
 port (
     -------------------- INPUTS --------------------
-    WE : in STD_LOGIC;  -- Write Enable Control Signal
-    RIB : in STD_LOGIC; -- Read Instruction Block Control Signal
-    ADDR : in STD_LOGIC_VECTOR((ADDR_WIDTH-1) downto 0);    -- LS read/write Address
-    DATA_IN : in STD_LOGIC_VECTOR((DATA_WIDTH-1) downto 0); -- Data to write into LS
+    WE : in STD_LOGIC := '0';  -- Write Enable Control Signal
+    RIB : in STD_LOGIC := '0'; -- Read Instruction Block Signal
+    ADDR : in STD_LOGIC_VECTOR((ADDR_WIDTH-1) downto 0) := (others => '0');    -- LS read/write Address
+    DATA_IN : in STD_LOGIC_VECTOR((DATA_WIDTH-1) downto 0) := (others => '0'); -- Data to write into LS
     -------------------- OUTPUTS --------------------
-    DATA_OUT : out STD_LOGIC_VECTOR((DATA_WIDTH-1) downto 0);        -- 16-Byte Data Read 
-    INSTR_BLOCK_OUT : out STD_LOGIC_VECTOR((INSTR_WIDTH-1) downto 0) -- 128-Byte Data Read (32 Instructions)
+    DATA_OUT : out STD_LOGIC_VECTOR((DATA_WIDTH-1) downto 0) := (others => '0');        -- 16-Byte Data Read 
+    INSTR_BLOCK_OUT : out STD_LOGIC_VECTOR((INSTR_WIDTH-1) downto 0) := (others => '0') -- 128-Byte Data Read (32 Instructions)
 );
 end local_store;
 
@@ -46,7 +46,9 @@ architecture behavioral of local_store is
 -- Local Store Data Section Start Address: 0x400 -- 
 -- Local Store Data Section Final Address: 0x780 --
 type sram_type is array (0 to (STORAGE_SIZE - 1)) of std_logic_vector ((DATA_WIDTH-1) downto 0);
-signal SRAM : sram_type := (others => (others => '0'));
+--signal SRMA : sram_type := (other => (others => '0'));
+-- For Testbench --
+signal SRAM : sram_type := (others => (x"DEAD_BEEF_DEAF_DEED_FACE_CAFE_DEED_C0DE"));
 -- Current Instruction Block Address --
 signal INSTRUCTION_BLOCK_ADDR : STD_LOGIC_VECTOR((ADDR_WIDTH-1) downto 0) := (others => '0');
 begin
