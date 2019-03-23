@@ -50,7 +50,7 @@ port (
     EVEN_RI7 : in STD_LOGIC_VECTOR((RI7_WIDTH-1) downto 0) := (others => '0');      -- Even Immediate RI7
     EVEN_RI10 : in STD_LOGIC_VECTOR((RI10_WIDTH-1) downto 0) := (others => '0');    -- Even Immediate RI10
     EVEN_RI16 : in STD_LOGIC_VECTOR((RI16_WIDTH-1) downto 0) := (others => '0');    -- Even Immediate RI16
-    ODD_RI7 : in STD_LOGIC_VECTOR((RI18_WIDTH-1) downto 0) := (others => '0');      -- Odd Immediate RI7
+    ODD_RI7 : in STD_LOGIC_VECTOR((RI7_WIDTH-1) downto 0) := (others => '0');      -- Odd Immediate RI7
     ODD_RI10 : in STD_LOGIC_VECTOR((RI10_WIDTH-1) downto 0) := (others => '0');     -- Odd Immediate RI10
     ODD_RI16 : in STD_LOGIC_VECTOR((RI16_WIDTH-1) downto 0) := (others => '0');     -- Odd Immediate RI16
     ODD_RI18 : in STD_LOGIC_VECTOR((RI18_WIDTH-1) downto 0) := (others => '0');     -- Odd Immediate RI18
@@ -94,9 +94,10 @@ architecture behavioral of register_file is
     --signal registers : registers_file_type := (others => (others => '0')); -- Initially Zero out all registers
     -- For Testbench
     signal registers : registers_file_type := (
+        (others => '0'),
         (x"0000_BEEF_0000_DEED_0000_CAFE_0000_C0DE"),
         (x"0000_C0FF_0000_DAFA_0000_EDBA_0000_EDAD"),
-        (others => '0')
+        others=>(others => '0')
     );
 begin
     

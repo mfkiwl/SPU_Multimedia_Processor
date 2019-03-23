@@ -138,19 +138,18 @@ signal ODD_PIPE_FC : FC := (others =>((others => '0'), (others => '0'), '0', 0))
 function check_dep(EVEN_FC : FC; -- Even Forwarding Circuit
                    ODD_FC : FC;  -- Odd Forwarding Circuit
                    ADDR : STD_LOGIC_VECTOR((ADDR_WIDTH-1) downto 0);  -- Register Address being Evaluated
-                   DATA_IN : STD_LOGIC_VECTOR((DATA_WIDTH-1) downto 0))
+                   DATA_IN : STD_LOGIC_VECTOR((DATA_WIDTH-1) downto 0)) -- Data from Register File
                    return STD_LOGIC_VECTOR is
     variable DATA_OUT : STD_LOGIC_VECTOR((DATA_WIDTH-1) downto 0); -- Data to be Forwarded
     variable I_FC : NATURAL := 0; -- Forwarding Circuit Index of Data
     variable found : BOOLEAN := false; -- Found a dependency?
 begin
+    DATA_OUT := DATA_IN; -- Initialize DATA_OUT to the Data from Register File
     ----- Check Even Forwarding Circuit -----
     while(I_FC < (FC_DEPTH-1)) loop  
         if (EVEN_FC(I_FC).REG_DEST = ADDR) then
             DATA_OUT := EVEN_FC(I_FC).RESULT;
             exit;
-        else 
-            DATA_OUT := DATA_IN;
         end if;
         I_FC := I_FC + 1; -- Go to next Result Packet
     end loop;
@@ -183,17 +182,6 @@ begin
     ODD_RI10_OUT_FM <= ODD_RI10;
     ODD_RI16_OUT_FM <= ODD_RI16;
     ODD_RI18_OUT_FM <= ODD_RI18;
-
-    -------------------- CONTROL INSTRUCTION PROCESS --------------------
-    CTRL_PROC : process (EVEN_OPCODE, ODD_OPCODE, RA_EVEN_DATA, RB_EVEN_DATA, RC_EVEN_DATA,
-                        RA_ODD_DATA, RB_ODD_DATA, RC_ODD_DATA, EVEN_RI7, EVEN_RI10, EVEN_RI16, 
-                        ODD_RI7, ODD_RI10, ODD_RI16, ODD_RI18) is
-    begin
-        -------------------- NOPS INSTRUCTIONS --------------------
-        
-        -------------------- STOP INSTRUCTION --------------------
-        
-    end process CTRL_PROC;
     
     -------------------- EVEN FC SHIFTING PROCESS --------------------
     FC_EVEN_PROC : process (CLK) is

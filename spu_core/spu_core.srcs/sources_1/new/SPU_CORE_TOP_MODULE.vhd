@@ -13,7 +13,7 @@ use IEEE.NUMERIC_STD.ALL;
 use work.COMPONENTS_PACKAGE.ALL; -- Contains result_packet Record
 
 -------------------- ENTITY DEFINITION --------------------
-entity spu_core_top_module is
+entity SPU_CORE_TOP_MODULE is
 generic (
     OPCODE_WIDTH : NATURAL := 11;  -- Maximum bit-width of Even and Odd Opcodes
     INSTR_WIDTH : NATURAL := 1024; -- Bit-width of Instruction Block
@@ -51,10 +51,10 @@ port (
     RESULT_PACKET_EVEN_OUT : out RESULT_PACKET := ((others => '0'), (others => '0'), '0', 0); -- Even Pipe Result Packet to Write Back Stage 
     RESULT_PACKET_ODD_OUT : out RESULT_PACKET := ((others => '0'), (others => '0'), '0', 0)   -- Odd Pipe Result Packet to Write Back Stage 
 );
-end spu_core_top_module;
+end SPU_CORE_TOP_MODULE;
 
 -------------------- ARCHITECTURE DEFINITION --------------------
-architecture behavioral of spu_core_top_module is
+architecture behavioral of SPU_CORE_TOP_MODULE is
 -------------------- REGISTER FILE -> FORWARDING MACRO SIGNALS --------------------
 signal EVEN_OPCODE_OUT : STD_LOGIC_VECTOR((OPCODE_WIDTH-1) downto 0) := (others => '0'); 
 signal RA_EVEN_DATA_OUT : STD_LOGIC_VECTOR((DATA_WIDTH-1) downto 0) := (others => '0'); 
@@ -73,7 +73,7 @@ signal RC_ODD_ADDR_OUT : STD_LOGIC_VECTOR((ADDR_WIDTH-1) downto 0) := (others =>
 signal EVEN_RI7_OUT : STD_LOGIC_VECTOR((RI7_WIDTH-1) downto 0) := (others => '0');     
 signal EVEN_RI10_OUT : STD_LOGIC_VECTOR((RI10_WIDTH-1) downto 0) := (others => '0');   
 signal EVEN_RI16_OUT : STD_LOGIC_VECTOR((RI16_WIDTH-1) downto 0) := (others => '0');    
-signal ODD_RI7_OUT : STD_LOGIC_VECTOR((RI18_WIDTH-1) downto 0) := (others => '0');      
+signal ODD_RI7_OUT : STD_LOGIC_VECTOR((RI7_WIDTH-1) downto 0) := (others => '0');      
 signal ODD_RI10_OUT : STD_LOGIC_VECTOR((RI10_WIDTH-1) downto 0) := (others => '0');    
 signal ODD_RI16_OUT : STD_LOGIC_VECTOR((RI16_WIDTH-1) downto 0) := (others => '0');   
 signal ODD_RI18_OUT : STD_LOGIC_VECTOR((RI18_WIDTH-1) downto 0) := (others => '0'); 
@@ -115,20 +115,20 @@ begin
     rf :register_file port map (
         ----- INPUTS -----
         CLK => CLK,
-        RW_EVEN => RESULT_PACKET_EVEN.RW,
-        RW_ODD => RESULT_PACKET_ODD.RW,
+        RW_EVEN => RESULT_PACKET_EVEN_OUT_FM.RW,
+        RW_ODD => RESULT_PACKET_ODD_OUT_FM.RW,
         EVEN_OPCODE => EVEN_OPCODE,
         RA_EVEN_ADDR => RA_EVEN_ADDR,
         RB_EVEN_ADDR => RB_EVEN_ADDR,
         RC_EVEN_ADDR => RC_EVEN_ADDR,
-        EVEN_WB_ADDR => RESULT_PACKET_EVEN.REG_DEST,
-        EVEN_WB_DATA => RESULT_PACKET_EVEN.RESULT,
+        EVEN_WB_ADDR => RESULT_PACKET_EVEN_OUT_FM.REG_DEST,
+        EVEN_WB_DATA => RESULT_PACKET_EVEN_OUT_FM.RESULT,
         ODD_OPCODE => ODD_OPCODE,
         RA_ODD_ADDR => RA_ODD_ADDR,
         RB_ODD_ADDR => RB_ODD_ADDR,
         RC_ODD_ADDR => RC_ODD_ADDR,
-        ODD_WB_ADDR => RESULT_PACKET_ODD.REG_DEST,
-        ODD_WB_DATA => RESULT_PACKET_ODD.RESULT,
+        ODD_WB_ADDR => RESULT_PACKET_ODD_OUT_FM.REG_DEST,
+        ODD_WB_DATA => RESULT_PACKET_ODD_OUT_FM.RESULT,
         EVEN_RI7 => EVEN_RI7, 
         EVEN_RI10 => EVEN_RI10,
         EVEN_RI16 => EVEN_RI16,
@@ -252,4 +252,8 @@ begin
         DATA_OUT => DATA_OUT,
         INSTR_BLOCK_OUT => INSTR_BLOCK_OUT
     );
+    
+    ----- OUTPUT RESULT PACKETS -----
+    RESULT_PACKET_EVEN_OUT <= RESULT_PACKET_EVEN_OUT_FM;
+    RESULT_PACKET_ODD_OUT <= RESULT_PACKET_ODD_OUT_FM;
 end behavioral;

@@ -15,7 +15,7 @@ use IEEE.NUMERIC_STD.ALL;
 use work.COMPONENTS_PACKAGE.ALL; -- SPU Core Components
 
 -------------------- ENTITY DEFINITION --------------------
-entity even_odd_pipes_TB is
+entity SPU_CORE_TOP_MODULE_TB is
 generic (
     OPCODE_WIDTH : NATURAL := 11;  -- Maximum bit-width of Even and Odd Opcodes
     INSTR_WIDTH : NATURAL := 1024; -- Bit-width of Instruction Block
@@ -27,11 +27,11 @@ generic (
     RI16_WIDTH : NATURAL := 16;    -- Immediate 16-bit format
     RI18_WIDTH : NATURAL := 18     -- Immediate 18-bit format
 );
-end even_odd_pipes_TB;
+end SPU_CORE_TOP_MODULE_TB;
 
 -------------------- ARCHITECTURE DEFINITION --------------------
-architecture behavioral of even_odd_pipes_TB is
-signal CLK : STD_LOGIC;
+architecture behavioral of SPU_CORE_TOP_MODULE_TB is
+signal CLK : STD_LOGIC := '1';
 signal EVEN_OPCODE : STD_LOGIC_VECTOR((OPCODE_WIDTH-1) downto 0) := (others => '0'); 
 signal RA_EVEN_ADDR : STD_LOGIC_VECTOR((ADDR_WIDTH-1) downto 0) := (others => '0'); 
 signal RB_EVEN_ADDR : STD_LOGIC_VECTOR((ADDR_WIDTH-1) downto 0) := (others => '0'); 
@@ -85,29 +85,40 @@ begin
     begin         
         -- Add Word
         EVEN_OPCODE <= STD_LOGIC_VECTOR(to_unsigned(192, OPCODE_WIDTH));
-        RA_EVEN_ADDR <= STD_LOGIC_VECTOR(to_unsigned(0, ADDR_WIDTH));
-        RB_EVEN_ADDR <= STD_LOGIC_VECTOR(to_unsigned(1, ADDR_WIDTH));
+        RA_EVEN_ADDR <= STD_LOGIC_VECTOR(to_unsigned(1, ADDR_WIDTH));
+        RB_EVEN_ADDR <= STD_LOGIC_VECTOR(to_unsigned(2, ADDR_WIDTH));
         EVEN_REG_DEST <= STD_LOGIC_VECTOR(to_unsigned(3, ADDR_WIDTH));
         
-        -- Load Quadword (a-form)
-        ODD_OPCODE <= STD_LOGIC_VECTOR(to_unsigned(97, OPCODE_WIDTH)); 
-        ODD_REG_DEST <= STD_LOGIC_VECTOR(to_unsigned(4, ADDR_WIDTH));
-        ODD_RI16 <= STD_LOGIC_VECTOR(to_unsigned(1024, RI16_WIDTH));
+        -- NOP (Execution)
+        ODD_OPCODE <= STD_LOGIC_VECTOR(to_unsigned(513, OPCODE_WIDTH));
+        
+--        -- Load Quadword (a-form)
+--        ODD_OPCODE <= STD_LOGIC_VECTOR(to_unsigned(97, OPCODE_WIDTH)); 
+--        ODD_REG_DEST <= STD_LOGIC_VECTOR(to_unsigned(4, ADDR_WIDTH));
+--        ODD_RI16 <= STD_LOGIC_VECTOR(to_unsigned(1024, RI16_WIDTH));
         
         wait for CLK_PERIOD;
         
-        -- Add Word Immediate
-        EVEN_OPCODE <= STD_LOGIC_VECTOR(to_unsigned(28, OPCODE_WIDTH));
-        RA_EVEN_ADDR <= STD_LOGIC_VECTOR(to_unsigned(0, ADDR_WIDTH));
-        RB_EVEN_ADDR <= STD_LOGIC_VECTOR(to_unsigned(1, ADDR_WIDTH));
-        EVEN_REG_DEST <= STD_LOGIC_VECTOR(to_unsigned(3, ADDR_WIDTH));
+        -- Add Word
+        EVEN_OPCODE <= STD_LOGIC_VECTOR(to_unsigned(192, OPCODE_WIDTH));
+        RA_EVEN_ADDR <= STD_LOGIC_VECTOR(to_unsigned(3, ADDR_WIDTH));
+        RB_EVEN_ADDR <= STD_LOGIC_VECTOR(to_unsigned(3, ADDR_WIDTH));
+        EVEN_REG_DEST <= STD_LOGIC_VECTOR(to_unsigned(5, ADDR_WIDTH));
         
-        -- Load Quadword (a-form)
-        ODD_OPCODE <= STD_LOGIC_VECTOR(to_unsigned(97, OPCODE_WIDTH)); 
-        ODD_REG_DEST <= STD_LOGIC_VECTOR(to_unsigned(4, ADDR_WIDTH));
-        ODD_RI16 <= STD_LOGIC_VECTOR(to_unsigned(1024, RI16_WIDTH));
+        -- NOP (Execution)
+        ODD_OPCODE <= STD_LOGIC_VECTOR(to_unsigned(513, OPCODE_WIDTH));
+       
+--        -- Add Word Immediate
+--        EVEN_OPCODE <= STD_LOGIC_VECTOR(to_unsigned(28, OPCODE_WIDTH));
+--        RA_EVEN_ADDR <= STD_LOGIC_VECTOR(to_unsigned(3, ADDR_WIDTH));
+--        EVEN_RI10 <= STD_LOGIC_VECTOR(to_unsigned(5, RI10_WIDTH));
+--        EVEN_REG_DEST <= STD_LOGIC_VECTOR(to_unsigned(5, ADDR_WIDTH));
         
-        wait for CLK_PERIOD;
+
+        
+--        wait for CLK_PERIOD;
+        
+        
         
         wait;
     end process;

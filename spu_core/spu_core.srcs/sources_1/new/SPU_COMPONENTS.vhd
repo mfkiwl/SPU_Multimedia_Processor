@@ -74,7 +74,7 @@ component SPU_CORE_TOP_MODULE
         ODD_RI18 : in STD_LOGIC_VECTOR((RI18_WIDTH_TOP-1) downto 0) := (others => '0');
         -------------------- OUTPUTS --------------------
         RESULT_PACKET_EVEN_OUT : out RESULT_PACKET := ((others => '0'), (others => '0'), '0', 0); 
-        RESULT_PACKET_ODD_OUT : out RESULT_PACKET := ((others => '0'), (others => '0'), '0', 0)  
+        RESULT_PACKET_ODD_OUT : out RESULT_PACKET := ((others => '0'), (others => '0'), '0', 0)
     );
 end component SPU_CORE_TOP_MODULE;
 

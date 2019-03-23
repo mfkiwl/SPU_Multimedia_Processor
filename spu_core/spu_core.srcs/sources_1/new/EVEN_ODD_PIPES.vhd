@@ -39,7 +39,8 @@ generic (
     RI7_WIDTH : NATURAL := 7;   -- Immediate 7-bit format
     RI10_WIDTH : NATURAL := 10; -- Immediate 10-bit format
     RI16_WIDTH : NATURAL := 16; -- Immediate 16-bit format
-    RI18_WIDTH : NATURAL := 18  -- Immediate 18-bit format
+    RI18_WIDTH : NATURAL := 18; -- Immediate 18-bit format
+    EXT_WIDTH : NATURAL := 32   -- Length of Extended Immediates
 );
 port (
     -------------------- INPUTS --------------------
@@ -81,7 +82,8 @@ begin
     
     -------------------- EVEN PIPE PROCESS --------------------
     EVEN_PIPE_PROC : process (CLK) is
-    variable EVEN_OP : INTEGER;
+    variable EVEN_OP : INTEGER; -- Integer version of Opcode
+    variable IMM_RI10_EXT : STD_LOGIC_VECTOR((EXT_WIDTH-1) downto 0);
     begin
         if (RISING_EDGE(CLK)) then
             ----- OUTPUT EVEN PIPE RESULTS -----
@@ -93,13 +95,19 @@ begin
             case EVEN_OP is
                 -------------------- SIMPLE FIXED 1 --------------------
                 when 16#C0# =>  -- Add Word
-                    RESULT_EVEN.RESULT(31 downto 0) <= STD_LOGIC_VECTOR(SIGNED(RA_EVEN_DATA(31 downto 0)) + SIGNED(RB_EVEN_DATA(31 downto 0)));
-                    RESULT_EVEN.RESULT(63 downto 32) <= STD_LOGIC_VECTOR(SIGNED(RA_EVEN_DATA(63 downto 32)) + SIGNED(RB_EVEN_DATA(63 downto 32)));
-                    RESULT_EVEN.RESULT(95 downto 64) <= STD_LOGIC_VECTOR(SIGNED(RA_EVEN_DATA(95 downto 64)) + SIGNED(RB_EVEN_DATA(95 downto 64)));
-                    RESULT_EVEN.RESULT(127 downto 96) <= STD_LOGIC_VECTOR(SIGNED(RA_EVEN_DATA(127 downto 96)) + SIGNED(RB_EVEN_DATA(127 downto 96)));
+                    RESULT_EVEN.RESULT(31 downto 0) <= STD_LOGIC_VECTOR(SIGNED(RA_EVEN_DATA(31 downto 0)) + SIGNED(RB_EVEN_DATA(31 downto 0)));                    
+                    RESULT_EVEN.RESULT(63 downto 32) <= STD_LOGIC_VECTOR(SIGNED(RA_EVEN_DATA(63 downto 32)) + SIGNED(RB_EVEN_DATA(63 downto 32)));                    
+                    RESULT_EVEN.RESULT(95 downto 64) <= STD_LOGIC_VECTOR(SIGNED(RA_EVEN_DATA(95 downto 64)) + SIGNED(RB_EVEN_DATA(95 downto 64)));                    
+                    RESULT_EVEN.RESULT(127 downto 96) <= STD_LOGIC_VECTOR(SIGNED(RA_EVEN_DATA(127 downto 96)) + SIGNED(RB_EVEN_DATA(127 downto 96)));                    
                     RESULT_EVEN.RW <= '1'; 
                     RESULT_EVEN.LATENCY <= SIMPLE_FIXED_1_L; 
                 when 16#1C# =>  -- Add Word Immediate
+                    RESULT_EVEN.RESULT(31 downto 0) <= STD_LOGIC_VECTOR(SIGNED(RA_EVEN_DATA(31 downto 0)) + resize(SIGNED(EVEN_RI10), EXT_WIDTH)); 
+                    RESULT_EVEN.RESULT(63 downto 32) <= STD_LOGIC_VECTOR(SIGNED(RA_EVEN_DATA(63 downto 32)) + resize(SIGNED(EVEN_RI10), EXT_WIDTH));                    
+                    RESULT_EVEN.RESULT(95 downto 64) <= STD_LOGIC_VECTOR(SIGNED(RA_EVEN_DATA(95 downto 64)) + resize(SIGNED(EVEN_RI10), EXT_WIDTH));                    
+                    RESULT_EVEN.RESULT(127 downto 96) <= STD_LOGIC_VECTOR(SIGNED(RA_EVEN_DATA(127 downto 96)) + resize(SIGNED(EVEN_RI10), EXT_WIDTH));                                       
+                    RESULT_EVEN.RW <= '1'; 
+                    RESULT_EVEN.LATENCY <= SIMPLE_FIXED_1_L; 
                 when 16#40# =>  -- Subtract from Word
                 when 16#FC# =>  -- Subtract from Word Immediate
                 when 16#2A5# => -- Count Leading Zeros
