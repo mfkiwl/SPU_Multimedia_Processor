@@ -1,0 +1,13 @@
+# compile vhdl design source files
+vhdl xil_defaultlib  \
+"../../../../spu_core.srcs/sources_1/new/SPU_COMPONENTS.vhd" \
+"../../../../spu_core.srcs/sources_1/new/SPU_CORE_ISA.vhd" \
+"../../../../spu_core.srcs/sources_1/new/EVEN_ODD_PIPES.vhd" \
+"../../../../spu_core.srcs/sources_1/new/SPU_CORE_TOP_MODULE.vhd" \
+"../../../../spu_core.srcs/sources_1/new/forwarding_macro_circuits.vhd" \
+"../../../../spu_core.srcs/sources_1/new/local_store.vhd" \
+"../../../../spu_core.srcs/sources_1/new/register_file.vhd" \
+"../../../../spu_core.srcs/sources_1/new/SPU_CORE_TOP_MODULE_TB.vhd" \
+
+# Do not sort compile order
+nosort

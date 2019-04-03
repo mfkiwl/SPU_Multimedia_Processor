@@ -18,32 +18,32 @@ use work.COMPONENTS_PACKAGE.ALL; -- SPU Core Components
 -------------------- ENTITY DEFINITION --------------------
 entity local_store_TB is
 generic (
-    STORAGE_SIZE : NATURAL := 2048;  -- Block number
-    ADDR_WIDTH : NATURAL := 15;      -- Bit-width of the SRAM Addresses 
-    DATA_WIDTH : NATURAL := 128;     -- Bit-width of the Data
-    INSTR_WIDTH : NATURAL := 1024    -- Bit-width of Instruction Block
+    STORAGE_SIZE : NATURAL := 2048; -- Block number
+    ADDR_WIDTH   : NATURAL := 15;   -- Bit-width of the SRAM Addresses 
+    DATA_WIDTH   : NATURAL := 128;  -- Bit-width of the Data
+    INSTR_WIDTH  : NATURAL := 1024  -- Bit-width of Instruction Block
 );
 end local_store_TB;
 
 -------------------- ARCHITECTURE DEFINITION --------------------
 architecture behavioral of local_store_TB is
 ----- INPUTS -----
-signal WE : STD_LOGIC := '0'; 
-signal RIB : STD_LOGIC := '0'; 
-signal ADDR : STD_LOGIC_VECTOR((ADDR_WIDTH-1) downto 0) := (others => '0');   
+signal WE      : STD_LOGIC := '0'; 
+signal RIB     : STD_LOGIC := '0'; 
+signal ADDR    : STD_LOGIC_VECTOR((ADDR_WIDTH-1) downto 0)    := (others => '0');   
 signal DATA_IN : STD_LOGIC_VECTOR((DATA_WIDTH-1) downto 0) := (others => '0');
 ----- OUTPUTS -----
-signal DATA_OUT : STD_LOGIC_VECTOR((DATA_WIDTH-1) downto 0) := (others => '0');     
+signal DATA_OUT        : STD_LOGIC_VECTOR((DATA_WIDTH-1) downto 0)  := (others => '0');     
 signal INSTR_BLOCK_OUT : STD_LOGIC_VECTOR((INSTR_WIDTH-1) downto 0) := (others => '0');
 -------------------- DELAY --------------------
 constant DELAY : TIME := 10ns;
 begin
     -------------------- INSTANTIATE UNIT UNDER TEST --------------------
     UUT : local_store port map (
-        WE => WE,
-        RIB => RIB,
+        WE   => WE,
+        RIB  => RIB,
         ADDR => ADDR,
-        DATA_IN => DATA_IN,
+        DATA_IN  => DATA_IN,
         DATA_OUT => DATA_OUT,
         INSTR_BLOCK_OUT => INSTR_BLOCK_OUT
     );

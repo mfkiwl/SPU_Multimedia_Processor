@@ -1,0 +1,1 @@
+-wto "f5468ca16f8b455b876940f50623fdc1" --incr --debug "typical" --relax --mt "2" -L "xil_defaultlib" -L "secureip" --snapshot "SPU_CORE_TOP_MODULE_TB_behav" "xil_defaultlib.SPU_CORE_TOP_MODULE_TB" -log "elaborate.log" 

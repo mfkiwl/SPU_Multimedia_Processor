@@ -23,66 +23,66 @@ use work.COMPONENTS_PACKAGE.ALL; -- SPU Core Components
 -------------------- ENTITY DEFINITION --------------------
 entity forwarding_macro_circuits_TB is
 generic (
-    FC_DEPTH : NATURAL := 7;      -- Forwarding Circuit Length
-    DATA_WIDTH : NATURAL := 128;  -- Bit-width of the Register Data
-    OPCODE_WIDTH : NATURAL := 11; -- Maximum bit-width of Even and Odd Opcodes
-    ADDR_WIDTH : NATURAL := 7;    -- Bit-width of the Register Addresses 
-    RI7_WIDTH : NATURAL := 7;     -- Immediate 7-bit format
-    RI10_WIDTH : NATURAL := 10;   -- Immediate 10-bit format
-    RI16_WIDTH : NATURAL := 16;   -- Immediate 16-bit format
-    RI18_WIDTH : NATURAL := 18    -- Immediate 18-bit format
+    FC_DEPTH     : NATURAL := 7;   -- Forwarding Circuit Length
+    DATA_WIDTH   : NATURAL := 128; -- Bit-width of the Register Data
+    OPCODE_WIDTH : NATURAL := 11;  -- Maximum bit-width of Even and Odd Opcodes
+    ADDR_WIDTH   : NATURAL := 7;   -- Bit-width of the Register Addresses 
+    RI7_WIDTH    : NATURAL := 7;   -- Immediate 7-bit format
+    RI10_WIDTH   : NATURAL := 10;  -- Immediate 10-bit format
+    RI16_WIDTH   : NATURAL := 16;  -- Immediate 16-bit format
+    RI18_WIDTH   : NATURAL := 18   -- Immediate 18-bit format
 );
 end forwarding_macro_circuits_TB;
 
 -------------------- ARCHITECTURE DEFINITION --------------------
 architecture behavioral of forwarding_macro_circuits_TB is
 -------------------- INPUTS --------------------
-signal CLK : STD_LOGIC := '1';
+signal CLK         : STD_LOGIC := '1';
 signal EVEN_OPCODE : STD_LOGIC_VECTOR((OPCODE_WIDTH-1) downto 0) := (others=>'0');
-signal ODD_OPCODE : STD_LOGIC_VECTOR((OPCODE_WIDTH-1) downto 0) := (others=>'0');
-signal RESULT_PACKET_EVEN_IN : RESULT_PACKET := ((others => '0'), (others => '0'), '0', 0); 
-signal RESULT_PACKET_ODD_IN : RESULT_PACKET := ((others => '0'), (others => '0'), '0', 0);  
-signal RA_EVEN_DATA : STD_LOGIC_VECTOR((DATA_WIDTH-1) downto 0) := (others=>'0'); 
-signal RB_EVEN_DATA : STD_LOGIC_VECTOR((DATA_WIDTH-1) downto 0) := (others=>'0'); 
-signal RC_EVEN_DATA : STD_LOGIC_VECTOR((DATA_WIDTH-1) downto 0) := (others=>'0'); 
-signal RA_ODD_DATA : STD_LOGIC_VECTOR((DATA_WIDTH-1) downto 0) := (others=>'0'); 
-signal RB_ODD_DATA : STD_LOGIC_VECTOR((DATA_WIDTH-1) downto 0) := (others=>'0'); 
-signal RC_ODD_DATA : STD_LOGIC_VECTOR((DATA_WIDTH-1) downto 0) := (others=>'0');
+signal ODD_OPCODE  : STD_LOGIC_VECTOR((OPCODE_WIDTH-1) downto 0) := (others=>'0');
+signal RESULT_PACKET_EVEN_IN : RESULT_PACKET_EVEN  := ((others => '0'), (others => '0'), '0', 0); 
+signal RESULT_PACKET_ODD_IN  : RESULT_PACKET_ODD   := ((others => '0'), (others => '0'), '0', 0);  
+signal RA_EVEN_DATA  : STD_LOGIC_VECTOR((DATA_WIDTH-1) downto 0) := (others=>'0'); 
+signal RB_EVEN_DATA  : STD_LOGIC_VECTOR((DATA_WIDTH-1) downto 0) := (others=>'0'); 
+signal RC_EVEN_DATA  : STD_LOGIC_VECTOR((DATA_WIDTH-1) downto 0) := (others=>'0'); 
+signal RA_ODD_DATA   : STD_LOGIC_VECTOR((DATA_WIDTH-1) downto 0) := (others=>'0'); 
+signal RB_ODD_DATA   : STD_LOGIC_VECTOR((DATA_WIDTH-1) downto 0) := (others=>'0'); 
+signal RC_ODD_DATA   : STD_LOGIC_VECTOR((DATA_WIDTH-1) downto 0) := (others=>'0');
 signal EVEN_REG_DEST : STD_LOGIC_VECTOR((ADDR_WIDTH-1) downto 0) := (others => '0');
 signal ODD_REG_DEST : STD_LOGIC_VECTOR((ADDR_WIDTH-1) downto 0) := (others => '0');
 signal RA_EVEN_ADDR : STD_LOGIC_VECTOR((ADDR_WIDTH-1) downto 0) := (others => '0'); 
 signal RB_EVEN_ADDR : STD_LOGIC_VECTOR((ADDR_WIDTH-1) downto 0) := (others => '0'); 
 signal RC_EVEN_ADDR : STD_LOGIC_VECTOR((ADDR_WIDTH-1) downto 0) := (others => '0'); 
-signal RA_ODD_ADDR : STD_LOGIC_VECTOR((ADDR_WIDTH-1) downto 0) := (others => '0'); 
-signal RB_ODD_ADDR : STD_LOGIC_VECTOR((ADDR_WIDTH-1) downto 0) := (others => '0'); 
-signal RC_ODD_ADDR : STD_LOGIC_VECTOR((ADDR_WIDTH-1) downto 0) := (others => '0'); 
-signal EVEN_RI7 : STD_LOGIC_VECTOR((RI7_WIDTH-1) downto 0) := (others => '0');      
+signal RA_ODD_ADDR  : STD_LOGIC_VECTOR((ADDR_WIDTH-1) downto 0) := (others => '0'); 
+signal RB_ODD_ADDR  : STD_LOGIC_VECTOR((ADDR_WIDTH-1) downto 0) := (others => '0'); 
+signal RC_ODD_ADDR  : STD_LOGIC_VECTOR((ADDR_WIDTH-1) downto 0) := (others => '0'); 
+signal EVEN_RI7  : STD_LOGIC_VECTOR((RI7_WIDTH-1) downto 0)  := (others => '0');      
 signal EVEN_RI10 : STD_LOGIC_VECTOR((RI10_WIDTH-1) downto 0) := (others => '0');    
 signal EVEN_RI16 : STD_LOGIC_VECTOR((RI16_WIDTH-1) downto 0) := (others => '0');    
-signal ODD_RI7 : STD_LOGIC_VECTOR((RI7_WIDTH-1) downto 0) := (others => '0');     
-signal ODD_RI10 : STD_LOGIC_VECTOR((RI10_WIDTH-1) downto 0) := (others => '0');     
-signal ODD_RI16 : STD_LOGIC_VECTOR((RI16_WIDTH-1) downto 0) := (others => '0');    
-signal ODD_RI18 : STD_LOGIC_VECTOR((RI18_WIDTH-1) downto 0) := (others => '0'); 
+signal ODD_RI7   : STD_LOGIC_VECTOR((RI7_WIDTH-1) downto 0)  := (others => '0');     
+signal ODD_RI10  : STD_LOGIC_VECTOR((RI10_WIDTH-1) downto 0) := (others => '0');     
+signal ODD_RI16  : STD_LOGIC_VECTOR((RI16_WIDTH-1) downto 0) := (others => '0');    
+signal ODD_RI18  : STD_LOGIC_VECTOR((RI18_WIDTH-1) downto 0) := (others => '0'); 
 -------------------- OUTPUTS --------------------
 signal RA_EVEN_DATA_OUT_FM : STD_LOGIC_VECTOR((DATA_WIDTH-1) downto 0) := (others=>'0'); 
 signal RB_EVEN_DATA_OUT_FM : STD_LOGIC_VECTOR((DATA_WIDTH-1) downto 0) := (others=>'0'); 
 signal RC_EVEN_DATA_OUT_FM : STD_LOGIC_VECTOR((DATA_WIDTH-1) downto 0) := (others=>'0'); 
-signal RA_ODD_DATA_OUT_FM : STD_LOGIC_VECTOR((DATA_WIDTH-1) downto 0) := (others=>'0');  
-signal RB_ODD_DATA_OUT_FM : STD_LOGIC_VECTOR((DATA_WIDTH-1) downto 0) := (others=>'0'); 
-signal RC_ODD_DATA_OUT_FM : STD_LOGIC_VECTOR((DATA_WIDTH-1) downto 0) := (others=>'0'); 
-signal RESULT_PACKET_EVEN_OUT_FM : RESULT_PACKET := ((others => '0'), (others => '0'), '0', 0); 
-signal RESULT_PACKET_ODD_OUT_FM : RESULT_PACKET := ((others => '0'), (others => '0'), '0', 0); 
-signal EVEN_RI7_OUT_FM : STD_LOGIC_VECTOR((RI7_WIDTH-1) downto 0) := (others => '0');  
+signal RA_ODD_DATA_OUT_FM  : STD_LOGIC_VECTOR((DATA_WIDTH-1) downto 0) := (others=>'0');  
+signal RB_ODD_DATA_OUT_FM  : STD_LOGIC_VECTOR((DATA_WIDTH-1) downto 0) := (others=>'0'); 
+signal RC_ODD_DATA_OUT_FM  : STD_LOGIC_VECTOR((DATA_WIDTH-1) downto 0) := (others=>'0'); 
+signal RESULT_PACKET_EVEN_OUT_FM : RESULT_PACKET_EVEN := ((others => '0'), (others => '0'), '0', 0); 
+signal RESULT_PACKET_ODD_OUT_FM  : RESULT_PACKET_ODD   := ((others => '0'), (others => '0'), '0', 0); 
+signal EVEN_RI7_OUT_FM  : STD_LOGIC_VECTOR((RI7_WIDTH-1) downto 0) := (others => '0');  
 signal EVEN_RI10_OUT_FM : STD_LOGIC_VECTOR((RI10_WIDTH-1) downto 0) := (others => '0'); 
 signal EVEN_RI16_OUT_FM : STD_LOGIC_VECTOR((RI16_WIDTH-1) downto 0) := (others => '0');
-signal ODD_RI7_OUT_FM : STD_LOGIC_VECTOR((RI7_WIDTH-1) downto 0) := (others => '0'); 
-signal ODD_RI10_OUT_FM : STD_LOGIC_VECTOR((RI10_WIDTH-1) downto 0) := (others => '0'); 
-signal ODD_RI16_OUT_FM : STD_LOGIC_VECTOR((RI16_WIDTH-1) downto 0) := (others => '0'); 
-signal ODD_RI18_OUT_FM : STD_LOGIC_VECTOR((RI18_WIDTH-1) downto 0) := (others => '0');  
-signal EVEN_REG_DEST_OUT_FM : STD_LOGIC_VECTOR((ADDR_WIDTH-1) downto 0) := (others => '0');  
-signal ODD_REG_DEST_OUT_FM : STD_LOGIC_VECTOR((ADDR_WIDTH-1) downto 0) := (others => '0');  
-signal EVEN_OPCODE_OUT_FM : STD_LOGIC_VECTOR((OPCODE_WIDTH-1) downto 0) := (others=>'0');
-signal ODD_OPCODE_OUT_FM : STD_LOGIC_VECTOR((OPCODE_WIDTH-1) downto 0) := (others=>'0');
+signal ODD_RI7_OUT_FM  : STD_LOGIC_VECTOR((RI7_WIDTH-1) downto 0)   := (others => '0'); 
+signal ODD_RI10_OUT_FM : STD_LOGIC_VECTOR((RI10_WIDTH-1) downto 0)  := (others => '0'); 
+signal ODD_RI16_OUT_FM : STD_LOGIC_VECTOR((RI16_WIDTH-1) downto 0)  := (others => '0'); 
+signal ODD_RI18_OUT_FM : STD_LOGIC_VECTOR((RI18_WIDTH-1) downto 0)  := (others => '0');  
+signal EVEN_REG_DEST_OUT_FM : STD_LOGIC_VECTOR((ADDR_WIDTH-1) downto 0)   := (others => '0');  
+signal ODD_REG_DEST_OUT_FM  : STD_LOGIC_VECTOR((ADDR_WIDTH-1) downto 0)   := (others => '0');  
+signal EVEN_OPCODE_OUT_FM   : STD_LOGIC_VECTOR((OPCODE_WIDTH-1) downto 0) := (others=>'0');
+signal ODD_OPCODE_OUT_FM    : STD_LOGIC_VECTOR((OPCODE_WIDTH-1) downto 0) := (others=>'0');
 -------------------- DELAY --------------------
 constant CLK_PERIOD : TIME := 10ns;
 begin
@@ -141,12 +141,12 @@ begin
     -------------------- FORWARDING MACRO/CIRCUITS STIMULUS PROCESS --------------------
     SIMULUS_PROC : process
         -- Even Pipe "Result" --
-        variable RESULT_EVEN_PACKET : RESULT_PACKET := (
+        variable RESULT_EVEN_PACKET : RESULT_PACKET_EVEN := (
             -- BABE
             STD_LOGIC_VECTOR(to_unsigned(47806, DATA_WIDTH)), STD_LOGIC_VECTOR(to_unsigned(14, ADDR_WIDTH)), '1', 4
         );
         -- Odd Pipe "Result" --
-        variable RESULT_ODD_PACKET : RESULT_PACKET := (
+        variable RESULT_ODD_PACKET : RESULT_PACKET_ODD := (
             -- DEED
             STD_LOGIC_VECTOR(to_unsigned(57069, DATA_WIDTH)), STD_LOGIC_VECTOR(to_unsigned(15, ADDR_WIDTH)), '1', 6
         );

@@ -17,15 +17,16 @@ use work.COMPONENTS_PACKAGE.ALL; -- SPU Core Components
 -------------------- ENTITY DEFINITION --------------------
 entity even_odd_pipes_TB is
 generic (
-    ADDR_WIDTH : NATURAL := 7;     -- Bit-width of the Register Addresses 
-    INSTR_WIDTH : NATURAL := 1024; -- Bit-width of Instruction Block
-    LS_ADDR_WIDTH : NATURAL := 15; -- Bit-width of the Local Store Addresses
-    DATA_WIDTH : NATURAL := 128;   -- Bit-width of the Register Data
-    OPCODE_WIDTH : NATURAL := 11;  -- Maximum bit-width of Even and Odd Opcodes
-    RI7_WIDTH : NATURAL := 7;   -- Immediate 7-bit format
-    RI10_WIDTH : NATURAL := 10; -- Immediate 10-bit format
-    RI16_WIDTH : NATURAL := 16; -- Immediate 16-bit format
-    RI18_WIDTH : NATURAL := 18  -- Immediate 18-bit format
+    ADDR_WIDTH    : NATURAL := 7;    -- Bit-width of the Register Addresses 
+    LS_ADDR_WIDTH : NATURAL := 15;   -- Bit-width of the Local Store Addresses
+    INSTR_WIDTH   : NATURAL := 1024; -- Bit-width of Instruction Block
+    DATA_WIDTH    : NATURAL := 128;  -- Bit-width of the Register Data
+    OPCODE_WIDTH  : NATURAL := 11;   -- Maximum bit-width of Even and Odd Opcodes
+    RI7_WIDTH     : NATURAL := 7;    -- Immediate 7-bit format
+    RI10_WIDTH    : NATURAL := 10;   -- Immediate 10-bit format
+    RI16_WIDTH    : NATURAL := 16;   -- Immediate 16-bit format
+    RI18_WIDTH    : NATURAL := 18;   -- Immediate 18-bit format
+    EXT_WIDTH     : NATURAL := 32    -- Length of Extended Immediates
 );
 end even_odd_pipes_TB;
 
@@ -33,76 +34,76 @@ end even_odd_pipes_TB;
 architecture behavioral of even_odd_pipes_TB is
 -------------------- EVEN_ODD_PIPES SIGNALS --------------------
 -------------------- INPUTS --------------------
-signal CLK : STD_LOGIC := '1';
-signal EVEN_RI7 : STD_LOGIC_VECTOR((RI7_WIDTH-1) downto 0) := (others => '0');  
+signal CLK       : STD_LOGIC := '1';
+signal EVEN_RI7  : STD_LOGIC_VECTOR((RI7_WIDTH-1) downto 0)  := (others => '0');  
 signal EVEN_RI10 : STD_LOGIC_VECTOR((RI10_WIDTH-1) downto 0) := (others => '0');
 signal EVEN_RI16 : STD_LOGIC_VECTOR((RI16_WIDTH-1) downto 0) := (others => '0');
-signal ODD_RI7 : STD_LOGIC_VECTOR((RI7_WIDTH-1) downto 0) := (others => '0');  
-signal ODD_RI10 : STD_LOGIC_VECTOR((RI10_WIDTH-1) downto 0) := (others => '0');
-signal ODD_RI16 : STD_LOGIC_VECTOR((RI16_WIDTH-1) downto 0) := (others => '0');
-signal ODD_RI18 : STD_LOGIC_VECTOR((RI18_WIDTH-1) downto 0) := (others => '0');
+signal ODD_RI7   : STD_LOGIC_VECTOR((RI7_WIDTH-1) downto 0)  := (others => '0');  
+signal ODD_RI10  : STD_LOGIC_VECTOR((RI10_WIDTH-1) downto 0) := (others => '0');
+signal ODD_RI16  : STD_LOGIC_VECTOR((RI16_WIDTH-1) downto 0) := (others => '0');
+signal ODD_RI18  : STD_LOGIC_VECTOR((RI18_WIDTH-1) downto 0) := (others => '0');
 signal EVEN_REG_DEST : STD_LOGIC_VECTOR((ADDR_WIDTH-1) downto 0) := (others => '0'); 
-signal ODD_REG_DEST : STD_LOGIC_VECTOR((ADDR_WIDTH-1) downto 0) := (others => '0'); 
-signal RA_EVEN_DATA : STD_LOGIC_VECTOR((DATA_WIDTH-1) downto 0) := (others=>'0'); 
-signal RB_EVEN_DATA : STD_LOGIC_VECTOR((DATA_WIDTH-1) downto 0) := (others=>'0');
-signal RC_EVEN_DATA : STD_LOGIC_VECTOR((DATA_WIDTH-1) downto 0) := (others=>'0');    
-signal RA_ODD_DATA : STD_LOGIC_VECTOR((DATA_WIDTH-1) downto 0) := (others=>'0'); 
-signal RB_ODD_DATA : STD_LOGIC_VECTOR((DATA_WIDTH-1) downto 0) := (others=>'0'); 
-signal RC_ODD_DATA : STD_LOGIC_VECTOR((DATA_WIDTH-1) downto 0) := (others=>'0'); 
-signal EVEN_OPCODE : STD_LOGIC_VECTOR((OPCODE_WIDTH-1) downto 0) := (others=>'0');
-signal ODD_OPCODE : STD_LOGIC_VECTOR((OPCODE_WIDTH-1) downto 0) := (others=>'0');
+signal ODD_REG_DEST  : STD_LOGIC_VECTOR((ADDR_WIDTH-1) downto 0) := (others => '0'); 
+signal RA_EVEN_DATA  : STD_LOGIC_VECTOR((DATA_WIDTH-1) downto 0) := (others=>'0'); 
+signal RB_EVEN_DATA  : STD_LOGIC_VECTOR((DATA_WIDTH-1) downto 0) := (others=>'0');
+signal RC_EVEN_DATA  : STD_LOGIC_VECTOR((DATA_WIDTH-1) downto 0) := (others=>'0');    
+signal RA_ODD_DATA   : STD_LOGIC_VECTOR((DATA_WIDTH-1) downto 0) := (others=>'0'); 
+signal RB_ODD_DATA   : STD_LOGIC_VECTOR((DATA_WIDTH-1) downto 0) := (others=>'0'); 
+signal RC_ODD_DATA   : STD_LOGIC_VECTOR((DATA_WIDTH-1) downto 0) := (others=>'0'); 
+signal EVEN_OPCODE   : STD_LOGIC_VECTOR((OPCODE_WIDTH-1) downto 0)  := (others=>'0');
+signal ODD_OPCODE    : STD_LOGIC_VECTOR((OPCODE_WIDTH-1) downto 0)  := (others=>'0');
 signal LOCAL_STORE_DATA : STD_LOGIC_VECTOR((DATA_WIDTH-1) downto 0) := (others => '0'); 
 -------------------- OUTPUTS --------------------
-signal WE_OUT : STD_LOGIC := '0'; 
+signal WE_OUT  : STD_LOGIC := '0'; 
 signal RIB_OUT : STD_LOGIC := '0';
-signal LS_DATA_OUT : STD_LOGIC_VECTOR((DATA_WIDTH-1) downto 0) := (others => '0'); 
-signal LOCAL_STORE_ADDR : STD_LOGIC_VECTOR((LS_ADDR_WIDTH-1) downto 0) := (others => '0');
-signal RESULT_PACKET_EVEN : RESULT_PACKET := ((others => '0'), (others => '0'), '0', 0);   
-signal RESULT_PACKET_ODD : RESULT_PACKET := ((others => '0'), (others => '0'), '0', 0);    
+signal LS_DATA_OUT        : STD_LOGIC_VECTOR((DATA_WIDTH-1) downto 0)    := (others => '0'); 
+signal LOCAL_STORE_ADDR   : STD_LOGIC_VECTOR((LS_ADDR_WIDTH-1) downto 0) := (others => '0');
+signal RESULT_PACKET_EVEN_OUT : RESULT_PACKET_EVEN := ((others => '0'), (others => '0'), '0', 0);   
+signal RESULT_PACKET_ODD_OUT  : RESULT_PACKET_ODD  := ((others => '0'), (others => '0'), '0', 0);    
 -------------------- LOCAL STORE SIGNALS --------------------
 ----- INPUTS -----
-signal WE : STD_LOGIC := '0'; 
-signal RIB : STD_LOGIC := '0'; 
-signal ADDR : STD_LOGIC_VECTOR((LS_ADDR_WIDTH-1) downto 0) := (others => '0');   
-signal DATA_IN : STD_LOGIC_VECTOR((DATA_WIDTH-1) downto 0) := (others => '0');
+signal WE      : STD_LOGIC := '0'; 
+signal RIB     : STD_LOGIC := '0'; 
+signal ADDR    : STD_LOGIC_VECTOR((LS_ADDR_WIDTH-1) downto 0) := (others => '0');   
+signal DATA_IN : STD_LOGIC_VECTOR((DATA_WIDTH-1) downto 0)    := (others => '0');
 ----- OUTPUTS -----
-signal DATA_OUT : STD_LOGIC_VECTOR((DATA_WIDTH-1) downto 0) := (others => '0');     
+signal DATA_OUT        : STD_LOGIC_VECTOR((DATA_WIDTH-1) downto 0)  := (others => '0');     
 signal INSTR_BLOCK_OUT : STD_LOGIC_VECTOR((INSTR_WIDTH-1) downto 0) := (others => '0');
 -------------------- CLOCK --------------------
 constant CLK_PERIOD : TIME := 10ns;
 begin
     -------------------- INSTANTIATE EVEN & ODD PIPE --------------------
     eop : even_odd_pipes port map (
-        CLK => CLK,
-        EVEN_RI7 => EVEN_RI7,
+        CLK       => CLK,
+        EVEN_RI7  => EVEN_RI7,
         EVEN_RI10 => EVEN_RI10,
         EVEN_RI16 => EVEN_RI16,
-        ODD_RI7 => ODD_RI7,
-        ODD_RI10 => ODD_RI10,
-        ODD_RI16 => ODD_RI16,
-        ODD_RI18 => ODD_RI18,
+        ODD_RI7   => ODD_RI7,
+        ODD_RI10  => ODD_RI10,
+        ODD_RI16  => ODD_RI16,
+        ODD_RI18  => ODD_RI18,
         EVEN_REG_DEST => EVEN_REG_DEST, 
-        ODD_REG_DEST => ODD_REG_DEST, 
-        RA_EVEN_DATA => RA_EVEN_DATA, 
-        RB_EVEN_DATA => RB_EVEN_DATA,
-        RC_EVEN_DATA => RC_EVEN_DATA,    
-        RA_ODD_DATA => RA_ODD_DATA, 
-        RB_ODD_DATA => RB_ODD_DATA, 
-        RC_ODD_DATA => RC_ODD_DATA,
-        EVEN_OPCODE => EVEN_OPCODE,
-        ODD_OPCODE => ODD_OPCODE,
-        LOCAL_STORE_DATA => DATA_OUT,
-        LOCAL_STORE_ADDR => LOCAL_STORE_ADDR,
-        RESULT_PACKET_EVEN => RESULT_PACKET_EVEN,  
-        RESULT_PACKET_ODD => RESULT_PACKET_ODD
+        ODD_REG_DEST  => ODD_REG_DEST, 
+        RA_EVEN_DATA  => RA_EVEN_DATA, 
+        RB_EVEN_DATA  => RB_EVEN_DATA,
+        RC_EVEN_DATA  => RC_EVEN_DATA,    
+        RA_ODD_DATA   => RA_ODD_DATA, 
+        RB_ODD_DATA   => RB_ODD_DATA, 
+        RC_ODD_DATA   => RC_ODD_DATA,
+        EVEN_OPCODE   => EVEN_OPCODE,
+        ODD_OPCODE    => ODD_OPCODE,
+        LOCAL_STORE_DATA   => DATA_OUT,
+        LOCAL_STORE_ADDR   => LOCAL_STORE_ADDR,
+        RESULT_PACKET_EVEN_OUT => RESULT_PACKET_EVEN_OUT,  
+        RESULT_PACKET_ODD_OUT  => RESULT_PACKET_ODD_OUT
     );
     
     -------------------- INSTANTIATE LOCAL STORE --------------------
     ls : local_store port map (
-        WE => WE,
-        RIB => RIB,
+        WE   => WE,
+        RIB  => RIB,
         ADDR => LOCAL_STORE_ADDR,
-        DATA_IN => DATA_IN,
+        DATA_IN  => DATA_IN,
         DATA_OUT => DATA_OUT,
         INSTR_BLOCK_OUT => INSTR_BLOCK_OUT
     );

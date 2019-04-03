@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wave_config>
+   <wave_state>
+   </wave_state>
+   <db_ref_list>
+      <db_ref path="SPU_CORE_TOP_MODULE_TB_behav.wdb" id="1">
+         <top_modules>
+            <top_module name="SPU_CORE_TOP_MODULE_TB" />
+            <top_module name="components_package" />
+            <top_module name="spu_core_isa_package" />
+         </top_modules>
+      </db_ref>
+   </db_ref_list>
+   <zoom_setting>
+      <ZoomStartTime time="0fs"></ZoomStartTime>
+      <ZoomEndTime time="200000001fs"></ZoomEndTime>
+      <Cursor1Time time="89733000fs"></Cursor1Time>
+   </zoom_setting>
+   <column_width_setting>
+      <NameColumnWidth column_width="420"></NameColumnWidth>
+      <ValueColumnWidth column_width="373"></ValueColumnWidth>
+   </column_width_setting>
+   <WVObjectSize size="52" />
+   <wvobject fp_name="/SPU_CORE_TOP_MODULE_TB/CLK" type="logic">
+      <obj_property name="ElementShortName">CLK</obj_property>
+      <obj_property name="ObjectShortName">CLK</obj_property>
+   </wvobject>
+   <wvobject fp_name="/SPU_CORE_TOP_MODULE_TB/EVEN_OPCODE" type="array">
+      <obj_property name="ElementShortName">EVEN_OPCODE[10:0]</obj_property>
+      <obj_property name="ObjectShortName">EVEN_OPCODE[10:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/SPU_CORE_TOP_MODULE_TB/RA_EVEN_ADDR" type="array">
+      <obj_property name="ElementShortName">RA_EVEN_ADDR[6:0]</obj_property>
+      <obj_property name="ObjectShortName">RA_EVEN_ADDR[6:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/SPU_CORE_TOP_MODULE_TB/RB_EVEN_ADDR" type="array">
+      <obj_property name="ElementShortName">RB_EVEN_ADDR[6:0]</obj_property>
+      <obj_property name="ObjectShortName">RB_EVEN_ADDR[6:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/SPU_CORE_TOP_MODULE_TB/EVEN_REG_DEST" type="array">
+      <obj_property name="ElementShortName">EVEN_REG_DEST[6:0]</obj_property>
+      <obj_property name="ObjectShortName">EVEN_REG_DEST[6:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/SPU_CORE_TOP_MODULE_TB/ODD_OPCODE" type="array">
+      <obj_property name="ElementShortName">ODD_OPCODE[10:0]</obj_property>
+      <obj_property name="ObjectShortName">ODD_OPCODE[10:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/SPU_CORE_TOP_MODULE_TB/RESULT_PACKET_EVEN_OUT" type="array">
+      <obj_property name="ElementShortName">RESULT_PACKET_EVEN_OUT</obj_property>
+      <obj_property name="ObjectShortName">RESULT_PACKET_EVEN_OUT</obj_property>
+   </wvobject>
+   <wvobject type="divider" fp_name="divider446">
+      <obj_property name="label">RF</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+   </wvobject>
+   <wvobject fp_name="/SPU_CORE_TOP_MODULE_TB/UUT/rf/EVEN_OPCODE_RF" type="array">
+      <obj_property name="ElementShortName">EVEN_OPCODE_RF[10:0]</obj_property>
+      <obj_property name="ObjectShortName">EVEN_OPCODE_RF[10:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/SPU_CORE_TOP_MODULE_TB/UUT/rf/ODD_OPCODE_RF" type="array">
+      <obj_property name="ElementShortName">ODD_OPCODE_RF[10:0]</obj_property>
+      <obj_property name="ObjectShortName">ODD_OPCODE_RF[10:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/SPU_CORE_TOP_MODULE_TB/UUT/rf/RA_EVEN_ADDR_RF" type="array">
+      <obj_property name="ElementShortName">RA_EVEN_ADDR_RF[6:0]</obj_property>
+      <obj_property name="ObjectShortName">RA_EVEN_ADDR_RF[6:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/SPU_CORE_TOP_MODULE_TB/UUT/rf/RB_EVEN_ADDR_RF" type="array">
+      <obj_property name="ElementShortName">RB_EVEN_ADDR_RF[6:0]</obj_property>
+      <obj_property name="ObjectShortName">RB_EVEN_ADDR_RF[6:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/SPU_CORE_TOP_MODULE_TB/UUT/rf/RC_EVEN_ADDR_RF" type="array">
+      <obj_property name="ElementShortName">RC_EVEN_ADDR_RF[6:0]</obj_property>
+      <obj_property name="ObjectShortName">RC_EVEN_ADDR_RF[6:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/SPU_CORE_TOP_MODULE_TB/UUT/rf/EVEN_WB_ADDR_RF" type="array">
+      <obj_property name="ElementShortName">EVEN_WB_ADDR_RF[6:0]</obj_property>
+      <obj_property name="ObjectShortName">EVEN_WB_ADDR_RF[6:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/SPU_CORE_TOP_MODULE_TB/UUT/rf/EVEN_WB_DATA_RF" type="array">
+      <obj_property name="ElementShortName">EVEN_WB_DATA_RF[127:0]</obj_property>
+      <obj_property name="ObjectShortName">EVEN_WB_DATA_RF[127:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/SPU_CORE_TOP_MODULE_TB/UUT/rf/EVEN_REG_DEST_RF" type="array">
+      <obj_property name="ElementShortName">EVEN_REG_DEST_RF[6:0]</obj_property>
+      <obj_property name="ObjectShortName">EVEN_REG_DEST_RF[6:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/SPU_CORE_TOP_MODULE_TB/UUT/rf/EVEN_OPCODE_OUT_RF" type="array">
+      <obj_property name="ElementShortName">EVEN_OPCODE_OUT_RF[10:0]</obj_property>
+      <obj_property name="ObjectShortName">EVEN_OPCODE_OUT_RF[10:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/SPU_CORE_TOP_MODULE_TB/UUT/rf/ODD_OPCODE_OUT_RF" type="array">
+      <obj_property name="ElementShortName">ODD_OPCODE_OUT_RF[10:0]</obj_property>
+      <obj_property name="ObjectShortName">ODD_OPCODE_OUT_RF[10:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/SPU_CORE_TOP_MODULE_TB/UUT/rf/RA_EVEN_DATA_OUT_RF" type="array">
+      <obj_property name="ElementShortName">RA_EVEN_DATA_OUT_RF[127:0]</obj_property>
+      <obj_property name="ObjectShortName">RA_EVEN_DATA_OUT_RF[127:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/SPU_CORE_TOP_MODULE_TB/UUT/rf/RB_EVEN_DATA_OUT_RF" type="array">
+      <obj_property name="ElementShortName">RB_EVEN_DATA_OUT_RF[127:0]</obj_property>
+      <obj_property name="ObjectShortName">RB_EVEN_DATA_OUT_RF[127:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/SPU_CORE_TOP_MODULE_TB/UUT/rf/RA_EVEN_ADDR_OUT_RF" type="array">
+      <obj_property name="ElementShortName">RA_EVEN_ADDR_OUT_RF[6:0]</obj_property>
+      <obj_property name="ObjectShortName">RA_EVEN_ADDR_OUT_RF[6:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/SPU_CORE_TOP_MODULE_TB/UUT/rf/RB_EVEN_ADDR_OUT_RF" type="array">
+      <obj_property name="ElementShortName">RB_EVEN_ADDR_OUT_RF[6:0]</obj_property>
+      <obj_property name="ObjectShortName">RB_EVEN_ADDR_OUT_RF[6:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/SPU_CORE_TOP_MODULE_TB/UUT/rf/EVEN_REG_DEST_OUT_RF" type="array">
+      <obj_property name="ElementShortName">EVEN_REG_DEST_OUT_RF[6:0]</obj_property>
+      <obj_property name="ObjectShortName">EVEN_REG_DEST_OUT_RF[6:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/SPU_CORE_TOP_MODULE_TB/CLK" type="logic">
+      <obj_property name="ElementShortName">CLK</obj_property>
+      <obj_property name="ObjectShortName">CLK</obj_property>
+   </wvobject>
+   <wvobject fp_name="/SPU_CORE_TOP_MODULE_TB/UUT/rf/registers" type="array">
+      <obj_property name="ElementShortName">registers[0:127][127:0]</obj_property>
+      <obj_property name="ObjectShortName">registers[0:127][127:0]</obj_property>
+   </wvobject>
+   <wvobject type="divider" fp_name="divider447">
+      <obj_property name="label">FWD</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+   </wvobject>
+   <wvobject fp_name="/SPU_CORE_TOP_MODULE_TB/UUT/fwc/EVEN_OPCODE_FM" type="array">
+      <obj_property name="ElementShortName">EVEN_OPCODE_FM[10:0]</obj_property>
+      <obj_property name="ObjectShortName">EVEN_OPCODE_FM[10:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/SPU_CORE_TOP_MODULE_TB/UUT/fwc/ODD_OPCODE_FM" type="array">
+      <obj_property name="ElementShortName">ODD_OPCODE_FM[10:0]</obj_property>
+      <obj_property name="ObjectShortName">ODD_OPCODE_FM[10:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/SPU_CORE_TOP_MODULE_TB/UUT/fwc/RA_EVEN_DATA_FM" type="array">
+      <obj_property name="ElementShortName">RA_EVEN_DATA_FM[127:0]</obj_property>
+      <obj_property name="ObjectShortName">RA_EVEN_DATA_FM[127:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/SPU_CORE_TOP_MODULE_TB/UUT/fwc/RB_EVEN_DATA_FM" type="array">
+      <obj_property name="ElementShortName">RB_EVEN_DATA_FM[127:0]</obj_property>
+      <obj_property name="ObjectShortName">RB_EVEN_DATA_FM[127:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/SPU_CORE_TOP_MODULE_TB/UUT/fwc/RA_EVEN_ADDR_FM" type="array">
+      <obj_property name="ElementShortName">RA_EVEN_ADDR_FM[6:0]</obj_property>
+      <obj_property name="ObjectShortName">RA_EVEN_ADDR_FM[6:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/SPU_CORE_TOP_MODULE_TB/UUT/fwc/RB_EVEN_ADDR_FM" type="array">
+      <obj_property name="ElementShortName">RB_EVEN_ADDR_FM[6:0]</obj_property>
+      <obj_property name="ObjectShortName">RB_EVEN_ADDR_FM[6:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/SPU_CORE_TOP_MODULE_TB/UUT/fwc/EVEN_REG_DEST_FM" type="array">
+      <obj_property name="ElementShortName">EVEN_REG_DEST_FM[6:0]</obj_property>
+      <obj_property name="ObjectShortName">EVEN_REG_DEST_FM[6:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/SPU_CORE_TOP_MODULE_TB/UUT/fwc/RESULT_PACKET_EVEN_FC" type="array">
+      <obj_property name="ElementShortName">RESULT_PACKET_EVEN_FC</obj_property>
+      <obj_property name="ObjectShortName">RESULT_PACKET_EVEN_FC</obj_property>
+   </wvobject>
+   <wvobject fp_name="/SPU_CORE_TOP_MODULE_TB/UUT/fwc/RESULT_PACKET_ODD_FC" type="array">
+      <obj_property name="ElementShortName">RESULT_PACKET_ODD_FC</obj_property>
+      <obj_property name="ObjectShortName">RESULT_PACKET_ODD_FC</obj_property>
+   </wvobject>
+   <wvobject fp_name="/SPU_CORE_TOP_MODULE_TB/UUT/fwc/RA_EVEN_DATA_OUT_FM" type="array">
+      <obj_property name="ElementShortName">RA_EVEN_DATA_OUT_FM[127:0]</obj_property>
+      <obj_property name="ObjectShortName">RA_EVEN_DATA_OUT_FM[127:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/SPU_CORE_TOP_MODULE_TB/UUT/fwc/RB_EVEN_DATA_OUT_FM" type="array">
+      <obj_property name="ElementShortName">RB_EVEN_DATA_OUT_FM[127:0]</obj_property>
+      <obj_property name="ObjectShortName">RB_EVEN_DATA_OUT_FM[127:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/SPU_CORE_TOP_MODULE_TB/UUT/fwc/EVEN_OPCODE_OUT_FM" type="array">
+      <obj_property name="ElementShortName">EVEN_OPCODE_OUT_FM[10:0]</obj_property>
+      <obj_property name="ObjectShortName">EVEN_OPCODE_OUT_FM[10:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/SPU_CORE_TOP_MODULE_TB/UUT/fwc/ODD_OPCODE_OUT_FM" type="array">
+      <obj_property name="ElementShortName">ODD_OPCODE_OUT_FM[10:0]</obj_property>
+      <obj_property name="ObjectShortName">ODD_OPCODE_OUT_FM[10:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/SPU_CORE_TOP_MODULE_TB/UUT/fwc/EVEN_REG_DEST_OUT_FM" type="array">
+      <obj_property name="ElementShortName">EVEN_REG_DEST_OUT_FM[6:0]</obj_property>
+      <obj_property name="ObjectShortName">EVEN_REG_DEST_OUT_FM[6:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/SPU_CORE_TOP_MODULE_TB/UUT/fwc/ODD_REG_DEST_OUT_FM" type="array">
+      <obj_property name="ElementShortName">ODD_REG_DEST_OUT_FM[6:0]</obj_property>
+      <obj_property name="ObjectShortName">ODD_REG_DEST_OUT_FM[6:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/SPU_CORE_TOP_MODULE_TB/UUT/fwc/RESULT_PACKET_EVEN_OUT_FC" type="array">
+      <obj_property name="ElementShortName">RESULT_PACKET_EVEN_OUT_FC</obj_property>
+      <obj_property name="ObjectShortName">RESULT_PACKET_EVEN_OUT_FC</obj_property>
+   </wvobject>
+   <wvobject type="divider" fp_name="divider552">
+      <obj_property name="label">EOP</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+   </wvobject>
+   <wvobject fp_name="/SPU_CORE_TOP_MODULE_TB/UUT/eop/EVEN_REG_DEST_EOP" type="array">
+      <obj_property name="ElementShortName">EVEN_REG_DEST_EOP[6:0]</obj_property>
+      <obj_property name="ObjectShortName">EVEN_REG_DEST_EOP[6:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/SPU_CORE_TOP_MODULE_TB/UUT/eop/RA_EVEN_DATA_EOP" type="array">
+      <obj_property name="ElementShortName">RA_EVEN_DATA_EOP[127:0]</obj_property>
+      <obj_property name="ObjectShortName">RA_EVEN_DATA_EOP[127:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/SPU_CORE_TOP_MODULE_TB/UUT/eop/RB_EVEN_DATA_EOP" type="array">
+      <obj_property name="ElementShortName">RB_EVEN_DATA_EOP[127:0]</obj_property>
+      <obj_property name="ObjectShortName">RB_EVEN_DATA_EOP[127:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/SPU_CORE_TOP_MODULE_TB/UUT/eop/EVEN_OPCODE_EOP" type="array">
+      <obj_property name="ElementShortName">EVEN_OPCODE_EOP[10:0]</obj_property>
+      <obj_property name="ObjectShortName">EVEN_OPCODE_EOP[10:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/SPU_CORE_TOP_MODULE_TB/UUT/eop/ODD_OPCODE_EOP" type="array">
+      <obj_property name="ElementShortName">ODD_OPCODE_EOP[10:0]</obj_property>
+      <obj_property name="ObjectShortName">ODD_OPCODE_EOP[10:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/SPU_CORE_TOP_MODULE_TB/UUT/eop/LOCAL_STORE_DATA_EOP" type="array">
+      <obj_property name="ElementShortName">LOCAL_STORE_DATA_EOP[127:0]</obj_property>
+      <obj_property name="ObjectShortName">LOCAL_STORE_DATA_EOP[127:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/SPU_CORE_TOP_MODULE_TB/UUT/eop/RESULT_PACKET_EVEN_OUT_EOP" type="array">
+      <obj_property name="ElementShortName">RESULT_PACKET_EVEN_OUT_EOP</obj_property>
+      <obj_property name="ObjectShortName">RESULT_PACKET_EVEN_OUT_EOP</obj_property>
+   </wvobject>
+   <wvobject fp_name="/SPU_CORE_TOP_MODULE_TB/UUT/eop/RESULT_PACKET_ODD_OUT_EOP" type="array">
+      <obj_property name="ElementShortName">RESULT_PACKET_ODD_OUT_EOP</obj_property>
+      <obj_property name="ObjectShortName">RESULT_PACKET_ODD_OUT_EOP</obj_property>
+   </wvobject>
+   <wvobject fp_name="/SPU_CORE_TOP_MODULE_TB/UUT/eop/RESULT_EVEN" type="array">
+      <obj_property name="ElementShortName">RESULT_EVEN</obj_property>
+      <obj_property name="ObjectShortName">RESULT_EVEN</obj_property>
+   </wvobject>
+</wave_config>
