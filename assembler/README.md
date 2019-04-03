@@ -1,7 +1,7 @@
 
 #  SPU Assembler
 
-> The program Assembles as specific subset of Instructions of the Sony Cell SPU.
+> Assembler for a specific subset of Instructions of the Sony Cell SPU.
 
 ## Instruction Subset
 ![](imgs/1_simple-fixed-1.jpg "Simple Fixed 1")
@@ -14,7 +14,7 @@
 ![](imgs/8_Branch.PNG "Branch")
 ![](imgs/9_control.PNG "Control")
 
-## Usage example
+## Test all instructions
 ```
 $ make all
 $ bin/assembler < rsrc/Test.asm > output/data
@@ -26,7 +26,7 @@ LQA 127, 0xFFFF
 lqd 127, 0x3FF(127)
 stqd 127, 0x3FF(127)
 stqa 127, 0xFFFF
-rib 0x3FFFF
+rib
 ilhu 127, 0xFFFF
 il 127, 0xFFFF
 ila 127, 0x3FFFF
@@ -163,5 +163,5 @@ NOP
 0x40200000
 ```
 
-In this example, the input file has all the Instructions with arbitrary operands. 
-The output file produced contains the hex values of each instruction.
+The input file has all the Instructions with arbitrary operands.  
+The output file produceds the 32-bit hex values of each instruction.
