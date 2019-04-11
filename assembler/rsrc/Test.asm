@@ -1,5 +1,4 @@
-# Test all Instructions
-LQA 127, 0xFFFF
+lqa 127, 0xFFFF
 lqd 127, 0x3FF(127)
 stqd 127, 0x3FF(127)
 stqa 127, 0xFFFF
@@ -21,7 +20,7 @@ orc 127, 126, 125
 ori 127, 126, 0x3FF
 orx 127, 126
 xor 127, 126, 125
-NAND 127, 126, 125
+nand 127, 126, 125
 nor 127, 126, 125               
 ceq 127, 126, 125
 ceqi 127, 126, 0x3FF

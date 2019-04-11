@@ -17,7 +17,7 @@
 ## Test all instructions
 ```
 $ make all
-$ bin/assembler < rsrc/Test.asm > output/data
+$ bin/assembler < rsrc/test.asm > output/data
 ```
 ### Input file: Test.asm
 ```
