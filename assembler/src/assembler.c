@@ -40,7 +40,7 @@ getInstr(char *instr, size_t size) {
 */
 void 
 output_data(unsigned *instr_data) {
-    printf("0x%08X\n", *instr_data);
+    printf("%08X\n", *instr_data);
 }   
 
 /* 

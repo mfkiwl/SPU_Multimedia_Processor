@@ -20,44 +20,35 @@ library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
 use IEEE.STD_LOGIC_UNSIGNED.ALL;
+use work.COMPONENTS_PACKAGE.ALL; -- SPU Core Components
 
 -------------------- ENTITY DEFINITION --------------------
 entity local_store is
-generic (
-    STORAGE_SIZE : NATURAL := 2048; -- Block number
-    ADDR_WIDTH   : NATURAL := 15;   -- Bit-width of the SRAM Addresses 
-    DATA_WIDTH   : NATURAL := 128;  -- Bit-width of the Data
-    INSTR_WIDTH  : NATURAL := 1024  -- Bit-width of Instruction Block
-);
-port (
-    -------------------- INPUTS --------------------
-    WE_LS      : in STD_LOGIC; -- Write Enable Control Signal
-    RIB_LS     : in STD_LOGIC; -- Read Instruction Block Signal
-    ADDR_LS    : in STD_LOGIC_VECTOR((ADDR_WIDTH-1) downto 0); -- LS read/write Address
-    DATA_IN_LS : in STD_LOGIC_VECTOR((DATA_WIDTH-1) downto 0); -- Data to write into LS
-    -------------------- OUTPUTS --------------------
-    DATA_OUT_LS        : out STD_LOGIC_VECTOR((DATA_WIDTH-1) downto 0)  := (others => '0'); -- 16-Byte Data Read 
-    INSTR_BLOCK_OUT_LS : out STD_LOGIC_VECTOR((INSTR_WIDTH-1) downto 0) := (others => '0')  -- 128-Byte Data Read (32 Instructions)
-);
+    port (
+        -------------------- INPUTS --------------------
+        WE_LS      : in STD_LOGIC; -- Write Enable Control Signal
+        RIB_LS     : in STD_LOGIC; -- Read Instruction Block Signal
+        FILL       : in STD_LOGIC; -- Fill LS with Instructions Flag
+        ADDR_LS    : in STD_LOGIC_VECTOR((ADDR_WIDTH_LS-1) downto 0); -- LS read/write Address
+        DATA_IN_LS : in STD_LOGIC_VECTOR((DATA_WIDTH-1) downto 0);    -- Data to write into LS
+        SRAM_INSTR : in SRAM_TYPE; -- SRAM Instruction Data
+        -------------------- OUTPUTS --------------------
+        DATA_OUT_LS        : out STD_LOGIC_VECTOR((DATA_WIDTH-1) downto 0)  := (others => '0');   -- 16-Byte Data Read 
+        INSTR_BLOCK_OUT_LS : out STD_LOGIC_VECTOR((INSTR_WIDTH_LS-1) downto 0) := (others => '0') -- 128-Byte Data Read (32 Instructions)
+    );
 end local_store;
 
 -------------------- ARCHITECTURE DEFINITION --------------------
 architecture behavioral of local_store is
--- 2kB x 16-byte block Storage --
--- Local Store Data Section Start Address: 0x400 -- 
--- Local Store Data Section End Address: 0x780 --
-type sram_type is array (0 to (STORAGE_SIZE - 1)) of std_logic_vector ((DATA_WIDTH-1) downto 0);
---signal SRMA : sram_type := (other => (others => '0'));
--- For Testbench --
-signal SRAM : sram_type := (others => (x"DEAD_BEEF_DEAF_DEED_FACE_CAFE_DEED_C0DE"));
+signal SRAM : sram_type := (others => (others => '0'));
 -- Current Instruction Block Address --
-signal INSTRUCTION_BLOCK_ADDR : STD_LOGIC_VECTOR((ADDR_WIDTH-1) downto 0) := (others => '0');
+signal INSTRUCTION_BLOCK_ADDR : STD_LOGIC_VECTOR((ADDR_WIDTH_LS-1) downto 0) := (others => '0');
 begin
-    -------------------- OUTPUT DATA -------------------- 
+    ------------------ OUTPUT DATA -------------------- 
     DATA_OUT_LS <= SRAM(to_integer(unsigned(ADDR_LS)));
      
-    -------------------- LOCAL STORE PROCESS --------------------
-    LOCAL_STORE_PROC : process(RIB_LS, WE_LS, ADDR_LS, DATA_IN_LS) is
+    ------------------ LOCAL STORE PROCESS --------------------
+    LOCAL_STORE_PROC : process(RIB_LS, WE_LS, ADDR_LS, DATA_IN_LS, FILL) 
     begin
         -- Output 128-Byte Block --
         if (RIB_LS = '1') then
@@ -74,6 +65,11 @@ begin
             INSTRUCTION_BLOCK_ADDR <= INSTRUCTION_BLOCK_ADDR + 8;
         end if;
         
+        -- Fill Instruction Data --
+        if (FILL = '1') then
+            SRAM <= SRAM_INSTR;
+        end if;
+                
         -- Write Data -- 
         if (WE_LS = '1') then
             SRAM(to_integer(unsigned(ADDR_LS))) <= DATA_IN_LS;

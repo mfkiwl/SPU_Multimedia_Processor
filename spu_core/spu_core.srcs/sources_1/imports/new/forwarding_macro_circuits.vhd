@@ -24,19 +24,9 @@ use work.COMPONENTS_PACKAGE.ALL; -- Contains result_packet Record
 
 -------------------- ENTITY DEFINITION --------------------
 entity forwarding_macro_circuits is
-generic (
-    
-    DATA_WIDTH   : NATURAL := 128; -- Bit-width of the Register Data
-    OPCODE_WIDTH : NATURAL := 11;  -- Maximum bit-width of Even and Odd Opcodes
-    ADDR_WIDTH   : NATURAL := 7;   -- Bit-width of the Register Addresses 
-    RI7_WIDTH    : NATURAL := 7;   -- Immediate 7-bit format
-    RI10_WIDTH   : NATURAL := 10;  -- Immediate 10-bit format
-    RI16_WIDTH   : NATURAL := 16;  -- Immediate 16-bit format
-    RI18_WIDTH   : NATURAL := 18   -- Immediate 18-bit format
-);
 port (
     -------------------- INPUTS --------------------
-    CLK                   : in STD_LOGIC := '0'; -- System Wide Synchronous Clock
+    CLK                   : in STD_LOGIC; -- System Wide Synchronous Clock
     EVEN_OPCODE_FM        : in STD_LOGIC_VECTOR((OPCODE_WIDTH-1) downto 0); -- Even Opcode
     ODD_OPCODE_FM         : in STD_LOGIC_VECTOR((OPCODE_WIDTH-1) downto 0); -- Odd Opcode
     RA_EVEN_DATA_FM       : in STD_LOGIC_VECTOR((DATA_WIDTH-1) downto 0); -- Even Pipe RA Data
@@ -89,6 +79,10 @@ end forwarding_macro_circuits;
 
 -------------------- ARCHITECTURE DEFINITION --------------------
 architecture behavioral of forwarding_macro_circuits is
+----- Even Pipe Forwarding Circuit -----
+signal EVEN_PIPE_FC : FC_EVEN := (others =>((others => '0'), (others => '0'), '0', 0));
+----- Odd Pipe Forwarding Circuit -----
+signal ODD_PIPE_FC : FC_ODD := (others =>((others => '0'), (others => '0'), '0', 0));
 begin
     -------------------- OUTPUT INSTRUCTION DATA --------------------
     EVEN_REG_DEST_OUT_FM <= EVEN_REG_DEST_FM;
@@ -105,12 +99,21 @@ begin
     ODD_RI16_OUT_FM  <= ODD_RI16_FM;
     ODD_RI18_OUT_FM  <= ODD_RI18_FM;
     
+    -------------------- CHECK FOR DEPENDENCIES --------------------
+    ----- Check Forwarding Circuits for Dependencies and Update Regiser Data -----
+    RA_EVEN_DATA_OUT_FM <= check_dep(EVEN_PIPE_FC, ODD_PIPE_FC, RA_EVEN_ADDR_FM, RA_EVEN_DATA_FM);
+    RB_EVEN_DATA_OUT_FM <= check_dep(EVEN_PIPE_FC, ODD_PIPE_FC, RB_EVEN_ADDR_FM, RB_EVEN_DATA_FM);
+    RC_EVEN_DATA_OUT_FM <= check_dep(EVEN_PIPE_FC, ODD_PIPE_FC, RC_EVEN_ADDR_FM, RC_EVEN_DATA_FM);
+    RA_ODD_DATA_OUT_FM  <= check_dep(EVEN_PIPE_FC, ODD_PIPE_FC, RA_ODD_ADDR_FM, RA_ODD_DATA_FM);
+    RB_ODD_DATA_OUT_FM  <= check_dep(EVEN_PIPE_FC, ODD_PIPE_FC, RB_ODD_ADDR_FM, RB_ODD_DATA_FM);
+    RC_ODD_DATA_OUT_FM  <= check_dep(EVEN_PIPE_FC, ODD_PIPE_FC, RC_ODD_ADDR_FM, RC_ODD_DATA_FM);
+    
     -------------------- EVEN FC SHIFTING PROCESS --------------------
     FC_EVEN_PROC : process (CLK) is
     begin
         if (RISING_EDGE(CLK))  then
             -- Shift Contents of Even Pipe to Corresponding Next "Stage" --
-            EVEN_PIPE_FC(1 to 6) <= EVEN_PIPE_FC(0 to 5);
+            EVEN_PIPE_FC(1 to (FC_DEPTH-1)) <= EVEN_PIPE_FC(0 to 6);
             -- Insert New Result Packet --
             EVEN_PIPE_FC(0) <= RESULT_PACKET_EVEN_FC; 
             
@@ -124,7 +127,7 @@ begin
     begin
         if (RISING_EDGE(CLK))  then
             -- Shift Contents of Odd Pipe to Corresponding Next "Stage" --
-            ODD_PIPE_FC(1 to 6) <= ODD_PIPE_FC(0 to 5);
+            ODD_PIPE_FC(1 to (FC_DEPTH-1)) <= ODD_PIPE_FC(0 to 6);
             -- Insert New Result Packet --
             ODD_PIPE_FC(0) <= RESULT_PACKET_ODD_FC; 
           
@@ -132,23 +135,5 @@ begin
             RESULT_PACKET_ODD_OUT_FC <= ODD_PIPE_FC(6);
         end if;
     end process FC_ODD_PROC;
-    
-    -------------------- FORWARDING MACRO PROCESS --------------------
-    ----- CHECK FOR DEPENDENCIES -----
-    FORWARDING_PROC : process (RA_EVEN_DATA_FM, RB_EVEN_DATA_FM, RC_EVEN_DATA_FM, RA_ODD_DATA_FM,
-                               RB_ODD_DATA_FM, RC_ODD_DATA_FM, RA_EVEN_DATA_FM, RB_EVEN_DATA_FM, 
-                               RC_EVEN_DATA_FM, RA_ODD_DATA_FM, RB_ODD_DATA_FM, RC_ODD_DATA_FM, 
-                               EVEN_RI7_FM, EVEN_RI10_FM, EVEN_RI16_FM, ODD_RI7_FM, ODD_RI10_FM, 
-                               ODD_RI16_FM, ODD_RI18_FM, EVEN_OPCODE_FM, ODD_OPCODE_FM, RA_EVEN_ADDR_FM,
-                               RB_EVEN_ADDR_FM, RC_EVEN_ADDR_FM, RA_ODD_ADDR_FM, RB_ODD_ADDR_FM, RC_ODD_ADDR_FM) is
-    begin    
-        ----- Check Forwarding Circuits for Dependencies and Update Output Regiser Data -----
-        RA_EVEN_DATA_OUT_FM <= check_dep(EVEN_PIPE_FC, ODD_PIPE_FC, RA_EVEN_ADDR_FM, RA_EVEN_DATA_FM);
-        RB_EVEN_DATA_OUT_FM <= check_dep(EVEN_PIPE_FC, ODD_PIPE_FC, RB_EVEN_ADDR_FM, RB_EVEN_DATA_FM);
-        RC_EVEN_DATA_OUT_FM <= check_dep(EVEN_PIPE_FC, ODD_PIPE_FC, RC_EVEN_ADDR_FM, RC_EVEN_DATA_FM);
-        RA_ODD_DATA_OUT_FM  <= check_dep(EVEN_PIPE_FC, ODD_PIPE_FC, RA_ODD_ADDR_FM, RA_ODD_DATA_FM);
-        RB_ODD_DATA_OUT_FM  <= check_dep(EVEN_PIPE_FC, ODD_PIPE_FC, RB_ODD_ADDR_FM, RB_ODD_DATA_FM);
-        RC_ODD_DATA_OUT_FM  <= check_dep(EVEN_PIPE_FC, ODD_PIPE_FC, RC_ODD_ADDR_FM, RC_ODD_DATA_FM);
-    end process FORWARDING_PROC;
 end behavioral;
 		

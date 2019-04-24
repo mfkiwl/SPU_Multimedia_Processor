@@ -6,7 +6,7 @@
 <Project Version="7" Minor="39" Path="C:/spu_core/spu_core.xpr">
   <DefaultLaunch Dir="$PRUNDIR"/>
   <Configuration>
-    <Option Name="Id" Val="f5468ca16f8b455b876940f50623fdc1"/>
+    <Option Name="Id" Val="0e3a2d4c07914af79c77799796fe1772"/>
     <Option Name="Part" Val="xc7a35tcpg236-1"/>
     <Option Name="CompiledLibDir" Val="$PCACHEDIR/compile_simlib"/>
     <Option Name="CompiledLibDirXSim" Val=""/>
@@ -18,8 +18,7 @@
     <Option Name="CompiledLibDirRiviera" Val="$PCACHEDIR/compile_simlib/riviera"/>
     <Option Name="CompiledLibDirActivehdl" Val="$PCACHEDIR/compile_simlib/activehdl"/>
     <Option Name="TargetLanguage" Val="VHDL"/>
-    <Option Name="SimulatorLanguage" Val="VHDL"/>
-    <Option Name="BoardPart" Val=""/>
+    <Option Name="BoardPart" Val="digilentinc.com:basys3:part0:1.1"/>
     <Option Name="ActiveSimSet" Val="sim_1"/>
     <Option Name="DefaultLib" Val="xil_defaultlib"/>
     <Option Name="ProjectType" Val="Default"/>
@@ -34,7 +33,7 @@
     <Option Name="DSAVendor" Val="xilinx"/>
     <Option Name="DSABoardId" Val="basys3"/>
     <Option Name="DSANumComputeUnits" Val="60"/>
-    <Option Name="WTXSimLaunchSim" Val="232"/>
+    <Option Name="WTXSimLaunchSim" Val="45"/>
     <Option Name="WTModelSimLaunchSim" Val="0"/>
     <Option Name="WTQuestaLaunchSim" Val="0"/>
     <Option Name="WTIesLaunchSim" Val="0"/>
@@ -62,45 +61,120 @@
   <FileSets Version="1" Minor="31">
     <FileSet Name="sources_1" Type="DesignSrcs" RelSrcDir="$PSRCDIR/sources_1">
       <Filter Type="Srcs"/>
-      <File Path="$PSRCDIR/sources_1/new/SPU_COMPONENTS.vhd">
-        <FileInfo>
-          <Attr Name="Library" Val="xil_defaultlib"/>
+      <File Path="$PSRCDIR/sources_1/imports/new/SPU_COMPONENTS.vhd">
+        <FileInfo SFType="VHDL2008">
+          <Attr Name="ImportPath" Val="$PPRDIR/../Users/Wilmer Suarez/Desktop/sources_1/new/SPU_COMPONENTS.vhd"/>
+          <Attr Name="ImportTime" Val="1555230044"/>
           <Attr Name="UsedIn" Val="synthesis"/>
           <Attr Name="UsedIn" Val="simulation"/>
         </FileInfo>
       </File>
-      <File Path="$PSRCDIR/sources_1/new/SPU_CORE_ISA.vhd">
-        <FileInfo>
+      <File Path="$PSRCDIR/sources_1/imports/new/SPU_CORE_ISA.vhd">
+        <FileInfo SFType="VHDL2008">
+          <Attr Name="ImportPath" Val="$PPRDIR/../Users/Wilmer Suarez/Desktop/sources_1/new/SPU_CORE_ISA.vhd"/>
+          <Attr Name="ImportTime" Val="1554928810"/>
           <Attr Name="UsedIn" Val="synthesis"/>
           <Attr Name="UsedIn" Val="simulation"/>
         </FileInfo>
       </File>
-      <File Path="$PSRCDIR/sources_1/new/EVEN_ODD_PIPES.vhd">
-        <FileInfo>
+      <File Path="$PSRCDIR/sources_1/imports/new/EVEN_ODD_PIPES.vhd">
+        <FileInfo SFType="VHDL2008">
+          <Attr Name="ImportPath" Val="$PPRDIR/../Users/Wilmer Suarez/Desktop/sources_1/new/EVEN_ODD_PIPES.vhd"/>
+          <Attr Name="ImportTime" Val="1555229902"/>
           <Attr Name="UsedIn" Val="synthesis"/>
           <Attr Name="UsedIn" Val="simulation"/>
         </FileInfo>
       </File>
-      <File Path="$PSRCDIR/sources_1/new/forwarding_macro_circuits.vhd">
-        <FileInfo>
+      <File Path="$PSRCDIR/sources_1/imports/new/EXECUTION_STAGE.vhd">
+        <FileInfo SFType="VHDL2008">
+          <Attr Name="ImportPath" Val="$PPRDIR/../Users/Wilmer Suarez/Desktop/sources_1/new/EXECUTION_STAGE.vhd"/>
+          <Attr Name="ImportTime" Val="1555229994"/>
           <Attr Name="UsedIn" Val="synthesis"/>
           <Attr Name="UsedIn" Val="simulation"/>
         </FileInfo>
       </File>
-      <File Path="$PSRCDIR/sources_1/new/local_store.vhd">
-        <FileInfo>
+      <File Path="$PSRCDIR/sources_1/imports/new/REGISTER_FETCH_STAGE.vhd">
+        <FileInfo SFType="VHDL2008">
+          <Attr Name="ImportPath" Val="$PPRDIR/../Users/Wilmer Suarez/Desktop/sources_1/new/REGISTER_FETCH_STAGE.vhd"/>
+          <Attr Name="ImportTime" Val="1555229955"/>
           <Attr Name="UsedIn" Val="synthesis"/>
           <Attr Name="UsedIn" Val="simulation"/>
         </FileInfo>
       </File>
-      <File Path="$PSRCDIR/sources_1/new/register_file.vhd">
-        <FileInfo>
+      <File Path="$PSRCDIR/sources_1/imports/new/forwarding_macro_circuits.vhd">
+        <FileInfo SFType="VHDL2008">
+          <Attr Name="ImportPath" Val="$PPRDIR/../Users/Wilmer Suarez/Desktop/sources_1/new/forwarding_macro_circuits.vhd"/>
+          <Attr Name="ImportTime" Val="1555229912"/>
           <Attr Name="UsedIn" Val="synthesis"/>
           <Attr Name="UsedIn" Val="simulation"/>
         </FileInfo>
       </File>
-      <File Path="$PSRCDIR/sources_1/new/SPU_CORE_TOP_MODULE.vhd">
-        <FileInfo>
+      <File Path="$PSRCDIR/sources_1/imports/new/register_file.vhd">
+        <FileInfo SFType="VHDL2008">
+          <Attr Name="ImportPath" Val="$PPRDIR/../Users/Wilmer Suarez/Desktop/sources_1/new/register_file.vhd"/>
+          <Attr Name="ImportTime" Val="1555229938"/>
+          <Attr Name="UsedIn" Val="synthesis"/>
+          <Attr Name="UsedIn" Val="simulation"/>
+        </FileInfo>
+      </File>
+      <File Path="$PSRCDIR/sources_1/imports/new/SPU_CORE_TOP_MODULE.vhd">
+        <FileInfo SFType="VHDL2008">
+          <Attr Name="ImportPath" Val="$PPRDIR/../Users/Wilmer Suarez/Desktop/sources_1/new/SPU_CORE_TOP_MODULE.vhd"/>
+          <Attr Name="ImportTime" Val="1555139772"/>
+          <Attr Name="UsedIn" Val="synthesis"/>
+          <Attr Name="UsedIn" Val="simulation"/>
+        </FileInfo>
+      </File>
+      <File Path="$PSRCDIR/sources_1/imports/new/local_store.vhd">
+        <FileInfo SFType="VHDL2008">
+          <Attr Name="AutoDisabled" Val="1"/>
+          <Attr Name="ImportPath" Val="$PPRDIR/../Users/Wilmer Suarez/Desktop/sources_1/new/local_store.vhd"/>
+          <Attr Name="ImportTime" Val="1555229744"/>
+          <Attr Name="UsedIn" Val="synthesis"/>
+          <Attr Name="UsedIn" Val="simulation"/>
+        </FileInfo>
+      </File>
+      <File Path="$PSRCDIR/sources_1/imports/new/DECODE_STAGE.vhd">
+        <FileInfo SFType="VHDL2008">
+          <Attr Name="AutoDisabled" Val="1"/>
+          <Attr Name="ImportPath" Val="$PPRDIR/../Users/Wilmer Suarez/Desktop/sources_1/new/DECODE_STAGE.vhd"/>
+          <Attr Name="ImportTime" Val="1554946497"/>
+          <Attr Name="UsedIn" Val="synthesis"/>
+          <Attr Name="UsedIn" Val="simulation"/>
+        </FileInfo>
+      </File>
+      <File Path="$PSRCDIR/sources_1/imports/new/DEPENDENCY_ISSUE_STAGE.vhd">
+        <FileInfo SFType="VHDL2008">
+          <Attr Name="AutoDisabled" Val="1"/>
+          <Attr Name="ImportPath" Val="$PPRDIR/../Users/Wilmer Suarez/Desktop/sources_1/new/DEPENDENCY_ISSUE_STAGE.vhd"/>
+          <Attr Name="ImportTime" Val="1554946504"/>
+          <Attr Name="UsedIn" Val="synthesis"/>
+          <Attr Name="UsedIn" Val="simulation"/>
+        </FileInfo>
+      </File>
+      <File Path="$PSRCDIR/sources_1/imports/new/INSTRUCTION_FETCH_STAGE.vhd">
+        <FileInfo SFType="VHDL2008">
+          <Attr Name="AutoDisabled" Val="1"/>
+          <Attr Name="ImportPath" Val="$PPRDIR/../Users/Wilmer Suarez/Desktop/sources_1/new/INSTRUCTION_FETCH_STAGE.vhd"/>
+          <Attr Name="ImportTime" Val="1554801920"/>
+          <Attr Name="UsedIn" Val="synthesis"/>
+          <Attr Name="UsedIn" Val="simulation"/>
+        </FileInfo>
+      </File>
+      <File Path="$PSRCDIR/sources_1/imports/new/instruction_cache.vhd">
+        <FileInfo SFType="VHDL2008">
+          <Attr Name="AutoDisabled" Val="1"/>
+          <Attr Name="ImportPath" Val="$PPRDIR/../Users/Wilmer Suarez/Desktop/sources_1/new/instruction_cache.vhd"/>
+          <Attr Name="ImportTime" Val="1554801581"/>
+          <Attr Name="UsedIn" Val="synthesis"/>
+          <Attr Name="UsedIn" Val="simulation"/>
+        </FileInfo>
+      </File>
+      <File Path="$PSRCDIR/sources_1/imports/new/decoder.vhd">
+        <FileInfo SFType="VHDL2008">
+          <Attr Name="AutoDisabled" Val="1"/>
+          <Attr Name="ImportPath" Val="$PPRDIR/../Users/Wilmer Suarez/Desktop/sources_1/new/decoder.vhd"/>
+          <Attr Name="ImportTime" Val="1554801615"/>
           <Attr Name="UsedIn" Val="synthesis"/>
           <Attr Name="UsedIn" Val="simulation"/>
         </FileInfo>
@@ -119,43 +193,64 @@
     </FileSet>
     <FileSet Name="sim_1" Type="SimulationSrcs" RelSrcDir="$PSRCDIR/sim_1">
       <Filter Type="Srcs"/>
-      <File Path="$PSRCDIR/sources_1/new/SPU_CORE_TOP_MODULE_TB.vhd">
-        <FileInfo>
+      <File Path="$PSRCDIR/sim_1/imports/Desktop/sources_1/new/SPU_CORE_TOP_MODULE_TB.vhd">
+        <FileInfo SFType="VHDL2008">
+          <Attr Name="ImportPath" Val="$PPRDIR/../Users/Wilmer Suarez/Desktop/sources_1/new/SPU_CORE_TOP_MODULE_TB.vhd"/>
+          <Attr Name="ImportTime" Val="1555219401"/>
           <Attr Name="UsedIn" Val="synthesis"/>
           <Attr Name="UsedIn" Val="simulation"/>
         </FileInfo>
       </File>
-      <File Path="$PSRCDIR/sim_1/new/local_store_TB.vhd">
-        <FileInfo>
+      <File Path="$PSRCDIR/sim_1/imports/Desktop/ls_fill_test_TB.vhd">
+        <FileInfo SFType="VHDL2008">
           <Attr Name="AutoDisabled" Val="1"/>
+          <Attr Name="ImportPath" Val="$PPRDIR/../Users/Wilmer Suarez/Desktop/ls_fill_test_TB.vhd"/>
+          <Attr Name="ImportTime" Val="1555219343"/>
           <Attr Name="UsedIn" Val="synthesis"/>
           <Attr Name="UsedIn" Val="simulation"/>
         </FileInfo>
       </File>
-      <File Path="$PSRCDIR/sources_1/new/even_odd_pipes_TB.vhd">
-        <FileInfo>
+      <File Path="$PSRCDIR/sim_1/imports/Desktop/new/forwarding_even_odd_pipe_TB.vhd">
+        <FileInfo SFType="VHDL2008">
           <Attr Name="AutoDisabled" Val="1"/>
+          <Attr Name="ImportPath" Val="$PPRDIR/../Users/Wilmer Suarez/Desktop/new/forwarding_even_odd_pipe_TB.vhd"/>
+          <Attr Name="ImportTime" Val="1554251502"/>
           <Attr Name="UsedIn" Val="synthesis"/>
           <Attr Name="UsedIn" Val="simulation"/>
         </FileInfo>
       </File>
-      <File Path="$PSRCDIR/sim_1/new/forwarding_macro_circuits_TB.vhd">
-        <FileInfo>
+      <File Path="$PSRCDIR/sim_1/imports/Desktop/new/forwarding_macro_circuits_TB.vhd">
+        <FileInfo SFType="VHDL2008">
           <Attr Name="AutoDisabled" Val="1"/>
+          <Attr Name="ImportPath" Val="$PPRDIR/../Users/Wilmer Suarez/Desktop/new/forwarding_macro_circuits_TB.vhd"/>
+          <Attr Name="ImportTime" Val="1554182560"/>
           <Attr Name="UsedIn" Val="synthesis"/>
           <Attr Name="UsedIn" Val="simulation"/>
         </FileInfo>
       </File>
-      <File Path="$PSRCDIR/sim_1/new/register_file_TB.vhd">
-        <FileInfo>
+      <File Path="$PSRCDIR/sim_1/imports/Desktop/sources_1/new/even_odd_pipes_TB.vhd">
+        <FileInfo SFType="VHDL2008">
           <Attr Name="AutoDisabled" Val="1"/>
+          <Attr Name="ImportPath" Val="$PPRDIR/../Users/Wilmer Suarez/Desktop/sources_1/new/even_odd_pipes_TB.vhd"/>
+          <Attr Name="ImportTime" Val="1554182397"/>
           <Attr Name="UsedIn" Val="synthesis"/>
           <Attr Name="UsedIn" Val="simulation"/>
         </FileInfo>
       </File>
-      <File Path="$PSRCDIR/sim_1/new/forwarding_even_odd_pipe_TB.vhd">
-        <FileInfo>
-          <Attr Name="UserDisabled" Val="1"/>
+      <File Path="$PSRCDIR/sim_1/imports/Desktop/new/register_file_TB.vhd">
+        <FileInfo SFType="VHDL2008">
+          <Attr Name="AutoDisabled" Val="1"/>
+          <Attr Name="ImportPath" Val="$PPRDIR/../Users/Wilmer Suarez/Desktop/new/register_file_TB.vhd"/>
+          <Attr Name="ImportTime" Val="1554145243"/>
+          <Attr Name="UsedIn" Val="synthesis"/>
+          <Attr Name="UsedIn" Val="simulation"/>
+        </FileInfo>
+      </File>
+      <File Path="$PSRCDIR/sim_1/imports/Desktop/new/all_instr_test.vhd">
+        <FileInfo SFType="VHDL2008">
+          <Attr Name="AutoDisabled" Val="1"/>
+          <Attr Name="ImportPath" Val="$PPRDIR/../Users/Wilmer Suarez/Desktop/new/all_instr_test.vhd"/>
+          <Attr Name="ImportTime" Val="1554761435"/>
           <Attr Name="UsedIn" Val="synthesis"/>
           <Attr Name="UsedIn" Val="simulation"/>
         </FileInfo>
@@ -167,7 +262,6 @@
         <Option Name="TransportPathDelay" Val="0"/>
         <Option Name="TransportIntDelay" Val="0"/>
         <Option Name="SrcSet" Val="sources_1"/>
-        <Option Name="xsim.simulate.log_all_signals" Val="true"/>
       </Config>
     </FileSet>
     <FileSet Name="utils_1" Type="Utils" RelSrcDir="$PSRCDIR/utils_1">
@@ -198,9 +292,7 @@
   <Runs Version="1" Minor="10">
     <Run Id="synth_1" Type="Ft3:Synth" SrcSet="sources_1" Part="xc7a35tcpg236-1" ConstrsSet="constrs_1" Description="Vivado Synthesis Defaults" AutoIncrementalCheckpoint="false" WriteIncrSynthDcp="false" State="current" IncludeInArchive="true">
       <Strategy Version="1" Minor="2">
-        <StratHandle Name="Vivado Synthesis Defaults" Flow="Vivado Synthesis 2018">
-          <Desc>Vivado Synthesis Defaults</Desc>
-        </StratHandle>
+        <StratHandle Name="Vivado Synthesis Defaults" Flow="Vivado Synthesis 2018"/>
         <Step Id="synth_design"/>
       </Strategy>
       <ReportStrategy Name="Vivado Synthesis Default Reports" Flow="Vivado Synthesis 2018"/>
@@ -208,9 +300,7 @@
     </Run>
     <Run Id="impl_1" Type="Ft2:EntireDesign" Part="xc7a35tcpg236-1" ConstrsSet="constrs_1" Description="Default settings for Implementation." AutoIncrementalCheckpoint="false" WriteIncrSynthDcp="false" State="current" SynthRun="synth_1" IncludeInArchive="true" GenFullBitstream="true">
       <Strategy Version="1" Minor="2">
-        <StratHandle Name="Vivado Implementation Defaults" Flow="Vivado Implementation 2018">
-          <Desc>Default settings for Implementation.</Desc>
-        </StratHandle>
+        <StratHandle Name="Vivado Implementation Defaults" Flow="Vivado Implementation 2018"/>
         <Step Id="init_design"/>
         <Step Id="opt_design"/>
         <Step Id="power_opt_design"/>
@@ -225,7 +315,9 @@
       <Report Name="ROUTE_DESIGN.REPORT_METHODOLOGY" Enabled="1"/>
     </Run>
   </Runs>
-  <Board/>
+  <Board>
+    <Jumpers/>
+  </Board>
   <DashboardSummary Version="1" Minor="0">
     <Dashboards>
       <Dashboard Name="default_dashboard">

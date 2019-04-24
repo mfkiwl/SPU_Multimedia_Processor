@@ -15,36 +15,28 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
+use work.COMPONENTS_PACKAGE.ALL;   -- Contains result_packet Record
 
 -------------------- ENTITY DEFINITION --------------------
 entity register_file is
-generic (
-   ADDR_WIDTH   : NATURAL := 7;   -- Bit-width of the Register Addresses 
-   DATA_WIDTH   : NATURAL := 128; -- Bit-width of the Register Data
-   OPCODE_WIDTH : NATURAL := 11;  -- Maximum Bit-width of Opcode
-   RI7_WIDTH    : NATURAL := 7;   -- Immediate 7-bit format
-   RI10_WIDTH   : NATURAL := 10;  -- Immediate 10-bit format
-   RI16_WIDTH   : NATURAL := 16;  -- Immediate 16-bit format
-   RI18_WIDTH   : NATURAL := 18   -- Immediate 18-bit format
-);
 port (
     -------------------- INPUTS --------------------
     ----- CONTROL SIGNALS -----
-    CLK              : in STD_LOGIC := '0'; -- System Wide Synchronous Clock
-    RW_EVEN_RF       : in STD_LOGIC := '0'; -- Even Register Write Control signal
-    RW_ODD_RF        : in STD_LOGIC := '0'; -- ODD Register Write Control signal
+    CLK              : in STD_LOGIC; -- System Wide Synchronous Clock
+    RW_EVEN_RF       : in STD_LOGIC; -- Even Register Write Control signal
+    RW_ODD_RF        : in STD_LOGIC; -- ODD Register Write Control signal
     EVEN_OPCODE_RF   : in STD_LOGIC_VECTOR((OPCODE_WIDTH-1) downto 0); -- Even Pipe Opcode
     ODD_OPCODE_RF    : in STD_LOGIC_VECTOR((OPCODE_WIDTH-1) downto 0); -- Odd Pipe Opcode
     RA_EVEN_ADDR_RF  : in STD_LOGIC_VECTOR((ADDR_WIDTH-1) downto 0); -- Even Pipe RA Register Address
     RB_EVEN_ADDR_RF  : in STD_LOGIC_VECTOR((ADDR_WIDTH-1) downto 0); -- Even Pipe RB Register Address
     RC_EVEN_ADDR_RF  : in STD_LOGIC_VECTOR((ADDR_WIDTH-1) downto 0); -- Even Pipe RC Register Address
-    EVEN_WB_ADDR_RF  : in STD_LOGIC_VECTOR((ADDR_WIDTH-1) downto 0) := (others => '0'); -- Even Pipe Write Back Register Address
-    EVEN_WB_DATA_RF  : in STD_LOGIC_VECTOR((DATA_WIDTH-1) downto 0) := (others => '0'); -- Even Pipe Write Back Data
+    EVEN_WB_ADDR_RF  : in STD_LOGIC_VECTOR((ADDR_WIDTH-1) downto 0); -- Even Pipe Write Back Register Address
+    EVEN_WB_DATA_RF  : in STD_LOGIC_VECTOR((DATA_WIDTH-1) downto 0); -- Even Pipe Write Back Data
     RA_ODD_ADDR_RF   : in STD_LOGIC_VECTOR((ADDR_WIDTH-1) downto 0); -- Odd Pipe RA Register Address
     RB_ODD_ADDR_RF   : in STD_LOGIC_VECTOR((ADDR_WIDTH-1) downto 0); -- Odd Pipe RB Register Address
     RC_ODD_ADDR_RF   : in STD_LOGIC_VECTOR((ADDR_WIDTH-1) downto 0); -- Odd Pipe RC Register Address
-    ODD_WB_ADDR_RF   : in STD_LOGIC_VECTOR((ADDR_WIDTH-1) downto 0) := (others => '0'); -- Odd Pipe Write Back Register Address
-    ODD_WB_DATA_RF   : in STD_LOGIC_VECTOR((DATA_WIDTH-1) downto 0) := (others => '0'); -- Odd Pipe Write Back Data
+    ODD_WB_ADDR_RF   : in STD_LOGIC_VECTOR((ADDR_WIDTH-1) downto 0); -- Odd Pipe Write Back Register Address
+    ODD_WB_DATA_RF   : in STD_LOGIC_VECTOR((DATA_WIDTH-1) downto 0); -- Odd Pipe Write Back Data
     EVEN_RI7_RF      : in STD_LOGIC_VECTOR((RI7_WIDTH-1) downto 0);  -- Even Immediate RI7
     EVEN_RI10_RF     : in STD_LOGIC_VECTOR((RI10_WIDTH-1) downto 0); -- Even Immediate RI10
     EVEN_RI16_RF     : in STD_LOGIC_VECTOR((RI16_WIDTH-1) downto 0); -- Even Immediate RI16
@@ -89,8 +81,7 @@ architecture behavioral of register_file is
     -- For Testbench --
     signal registers : registers_file_type := (
         (others => '0'),
-        (x"0000_BEEF_0000_DEED_0000_CAFE_0000_C0DE"),
-        (x"0000_C0FF_0000_DAFA_0000_EDBA_0000_EDAD"),
+        (x"0000_0001_0000_0001_0000_0001_0000_0001"),
         others=>(others => '0')
     );
 begin

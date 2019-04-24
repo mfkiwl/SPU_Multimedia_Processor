@@ -12,13 +12,10 @@ exedir="/c/Users/Wilmer Suarez/Desktop/SPU_Multimedia_Processor/assembler/bin/as
 # Resource Directory #
 rsrcdir="/c/Users/Wilmer Suarez/Desktop/SPU_Multimedia_Processor/assembler/rsrc";
 # Output Directory #
-outdir="/c/Users/Wilmer Suarez/Desktop/SPU_Multimedia_Processor/assembler/output";
+outdir="C:\Users\Wilmer Suarez\Desktop\SPU_Multimedia_Processor\assembler\output";
 
 #################### COMPILE ASSEMBLER ####################
-make clean all -s -C "$makedir"; # &> /dev/null
+make clean all -s -C "$makedir";
 
 #################### EXECUTE TEST ####################
-"$exedir" < "$rsrcdir/test.asm" > "$outdir/data";
-
-#################### OPEN TEST RESULTS ####################
-code -n "$rsrcdir/test.asm" "$outdir/data";
+"$exedir" < "$rsrcdir/0_assembler_test.asm" > "$outdir\data.txt";

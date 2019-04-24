@@ -32,20 +32,9 @@ use work.SPU_CORE_ISA_PACKAGE.ALL; -- Contains all instructions in ISA
 
 -------------------- ENTITY DEFINITION --------------------
 entity even_odd_pipes is
-generic (
-    ADDR_WIDTH    : NATURAL := 7;   -- Bit-width of the Register Addresses 
-    LS_ADDR_WIDTH : NATURAL := 15;  -- Bit-width of the Local Store Addresses
-    DATA_WIDTH    : NATURAL := 128; -- Bit-width of the Register Data
-    OPCODE_WIDTH  : NATURAL := 11;  -- Maximum bit-width of Even and Odd Opcodes
-    RI7_WIDTH     : NATURAL := 7;   -- Immediate 7-bit format
-    RI10_WIDTH    : NATURAL := 10;  -- Immediate 10-bit format
-    RI16_WIDTH    : NATURAL := 16;  -- Immediate 16-bit format
-    RI18_WIDTH    : NATURAL := 18;  -- Immediate 18-bit format
-    EXT_WIDTH     : NATURAL := 32   -- Length of Extended Immediates
-);
 port (
     -------------------- INPUTS --------------------
-    CLK               : in STD_LOGIC := '0'; -- System Wide Synchronous 
+    CLK               : in STD_LOGIC; -- System Wide Synchronous 
     EVEN_RI7_EOP      : in STD_LOGIC_VECTOR((RI7_WIDTH-1) downto 0);     -- Even Immediate RI7
     EVEN_RI10_EOP     : in STD_LOGIC_VECTOR((RI10_WIDTH-1) downto 0);    -- Even Immediate RI10
     EVEN_RI16_EOP     : in STD_LOGIC_VECTOR((RI16_WIDTH-1) downto 0);    -- Even Immediate RI16
@@ -68,7 +57,7 @@ port (
     LS_WE_OUT_EOP              : out STD_LOGIC := '0'; -- Local Store Write Enable Control Signal
     LS_RIB_OUT_EOP             : out STD_LOGIC := '0'; -- Local Store Read Instruction Block Signal
     LS_DATA_OUT_EOP            : out STD_LOGIC_VECTOR((DATA_WIDTH-1) downto 0)    := (others => '0');  -- Data to write into LS
-    LS_ADDR_OUT_EOP            : out STD_LOGIC_VECTOR((LS_ADDR_WIDTH-1) downto 0) := (others => '0');  -- Local Store Address
+    LS_ADDR_OUT_EOP            : out STD_LOGIC_VECTOR((ADDR_WIDTH_LS-1) downto 0) := (others => '0');  -- Local Store Address
     RESULT_PACKET_EVEN_OUT_EOP : out RESULT_PACKET_EVEN := ((others => '0'), (others => '0'), '0', 0); -- Result Packet from Even Execution Units 
     RESULT_PACKET_ODD_OUT_EOP  : out RESULT_PACKET_ODD  := ((others => '0'), (others => '0'), '0', 0)  -- Result Packet from Odd Execution Units
 );
@@ -79,6 +68,7 @@ architecture behavioral of even_odd_pipes is
 ----- INSTRUCTION RESULTS -----
 signal RESULT_EVEN : RESULT_PACKET_EVEN := ((others => '0'), (others => '0'), '0', 0);
 signal RESULT_ODD  : RESULT_PACKET_ODD  := ((others => '0'), (others => '0'), '0', 0);
+constant EXT_WIDTH : NATURAL := 32; -- Length of Extended Immediates
 begin
 
     ----- OUTPUT EVEN PIPE RESULTS -----
@@ -88,7 +78,6 @@ begin
     EVEN_PIPE_PROC : process (CLK) is
     variable EVEN_OP : INTEGER; -- Integer conversion of Even Opcode
     begin
-        if (RISING_EDGE(CLK)) then
             EVEN_OP := to_integer(SIGNED(EVEN_OPCODE_EOP));
             case EVEN_OP is
                 -------------------- SIMPLE FIXED 1 --------------------
@@ -108,13 +97,13 @@ begin
                     RESULT_EVEN.REG_DEST              <= EVEN_REG_DEST_EOP;
                     RESULT_EVEN.RW                    <= '1'; 
                     RESULT_EVEN.LATENCY               <= SIMPLE_FIXED_1_L; 
-                when 16#40# =>  -- Subtract from Word
+                when 16#43# =>  -- Subtract from Word
                 
                 when 16#FC# =>  -- Subtract from Word Immediate
                 
                 when 16#2A5# => -- Count Leading Zeros
                 
-                when 16#C1# =>  -- AND
+                when 16#C2# =>  -- AND
                 
                 when 16#2C1# => -- AND with Complement
                 
@@ -206,7 +195,6 @@ begin
                 when others =>
                     -- Do nothing
             end case;
-        end if;
     end process EVEN_PIPE_PROC;
     
     ----- OUTPUT EVEN PIPE RESULTS -----
@@ -216,65 +204,63 @@ begin
     ODD_PIPE_PROC : process (CLK) is
     variable ODD_OP : INTEGER; -- Integer conversion of Odd Opcode
     begin
-        if (RISING_EDGE(CLK)) then
-            ODD_OP := to_integer(SIGNED(ODD_OPCODE_EOP));
-            case ODD_OP is
-                -------------------- LOCAL STORE INSTRUCTIONS --------------------
-                when 16#61# =>  -- Load Quadword (a-form)
-                    LS_ADDR_OUT_EOP     <= STD_LOGIC_VECTOR(resize(UNSIGNED(ODD_RI16_EOP), LS_ADDR_WIDTH));
-                    RESULT_ODD.RESULT   <= LOCAL_STORE_DATA_EOP; 
-                    RESULT_ODD.REG_DEST <= ODD_REG_DEST_EOP; 
-                    RESULT_ODD.RW       <= '1'; 
-                    RESULT_ODD.LATENCY  <= LOCAL_STORE_L; 
-                when 16#34# =>  -- Load Quadword (d-form)
-                
-                when 16#24# =>  -- Store Quadword (d-form)
-                
-                when 16#51# =>  -- Store Quadword (a-form)
-                
-                when 16#23# =>  -- Read Instruction Block
-                
-                when 16#82# =>  -- Immediate Load Half Word Upper
-                
-                when 16#81# =>  -- Immediate Load Word
-                
-                when 16#21# =>  -- Immediate load Address
-                
-                when 16#C1# =>  -- Immediate OR Halfword Lower
-                
-                -------------------- PERMUTE INSTRUCTIONS --------------------
-                when 16#1FB# => -- Shift Left Quadword by Bits Immediate
-                
-                when 16#1FF# => -- Shift Left Quadword by Bytes Immediate
-                
-                when 16#1FC# => -- Rotate Quadword by Bytes Immediate
-                
-                when 16#1F8# => -- Rotate Quadword by Bits Immediate
-                
-                -------------------- BRANCH INSTRUCTIONS --------------------
-                when 16#64# =>  -- Branch Relative
-                
-                when 16#60# =>  -- Branch Absolute
-                
-                when 16#1A8# => -- Branch Indirect
-                
-                when 16#42# =>  -- Branch If Not Zero Word
-                
-                when 16#40# =>  -- Branch If Zero Word
-                
-                when 16#128# => -- Branch Indirect If Zero
-                
-                when 16#129# => -- Branch Indirect If Not Zero
-                
-                when 16#201# => -- NOP (Execute)
-                    RESULT_ODD.RESULT   <= STD_LOGIC_VECTOR(to_unsigned(0, DATA_WIDTH));
-                    RESULT_ODD.REG_DEST <= STD_LOGIC_VECTOR(to_unsigned(0, ADDR_WIDTH)); 
-                    RESULT_ODD.RW       <= '0'; 
-                    RESULT_ODD.LATENCY  <= NOP_L;
-                when others =>
-                    -- Do nothing
-            end case;
-        end if;
+        ODD_OP := to_integer(SIGNED(ODD_OPCODE_EOP));
+        case ODD_OP is
+            -------------------- LOCAL STORE INSTRUCTIONS --------------------
+            when 16#61# =>  -- Load Quadword (a-form)
+                LS_ADDR_OUT_EOP     <= STD_LOGIC_VECTOR(resize(UNSIGNED(ODD_RI16_EOP), ADDR_WIDTH_LS));
+                RESULT_ODD.RESULT   <= LOCAL_STORE_DATA_EOP; 
+                RESULT_ODD.REG_DEST <= ODD_REG_DEST_EOP; 
+                RESULT_ODD.RW       <= '1'; 
+                RESULT_ODD.LATENCY  <= LOCAL_STORE_L; 
+            when 16#34# =>  -- Load Quadword (d-form)
+            
+            when 16#24# =>  -- Store Quadword (d-form)
+            
+            when 16#51# =>  -- Store Quadword (a-form)
+            
+            when 16#23# =>  -- Read Instruction Block
+            
+            when 16#82# =>  -- Immediate Load Half Word Upper
+            
+            when 16#81# =>  -- Immediate Load Word
+            
+            when 16#21# =>  -- Immediate load Address
+            
+            when 16#C1# =>  -- Immediate OR Halfword Lower
+            
+            -------------------- PERMUTE INSTRUCTIONS --------------------
+            when 16#1FB# => -- Shift Left Quadword by Bits Immediate
+            
+            when 16#1FF# => -- Shift Left Quadword by Bytes Immediate
+            
+            when 16#1FC# => -- Rotate Quadword by Bytes Immediate
+            
+            when 16#1F8# => -- Rotate Quadword by Bits Immediate
+            
+            -------------------- BRANCH INSTRUCTIONS --------------------
+            when 16#64# =>  -- Branch Relative
+            
+            when 16#60# =>  -- Branch Absolute
+            
+            when 16#1A8# => -- Branch Indirect
+            
+            when 16#42# =>  -- Branch If Not Zero Word
+            
+            when 16#40# =>  -- Branch If Zero Word
+            
+            when 16#128# => -- Branch Indirect If Zero
+            
+            when 16#129# => -- Branch Indirect If Not Zero
+            
+            when 16#201# => -- NOP (Execute)
+                RESULT_ODD.RESULT   <= STD_LOGIC_VECTOR(to_unsigned(0, DATA_WIDTH));
+                RESULT_ODD.REG_DEST <= STD_LOGIC_VECTOR(to_unsigned(0, ADDR_WIDTH)); 
+                RESULT_ODD.RW       <= '0'; 
+                RESULT_ODD.LATENCY  <= NOP_L;
+            when others =>
+                -- Do nothing
+        end case;
     end process ODD_PIPE_PROC;
 end behavioral;
 		
