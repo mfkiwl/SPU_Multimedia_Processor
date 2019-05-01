@@ -9,7 +9,7 @@
 -------------------- LIBRARIES --------------------
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
-use work.COMPONENTS_PACKAGE.ALL; -- Contains result_packet Record
+use work.COMPONENTS_PACKAGE.ALL; 
 
 -------------------- ENTITY DEFINITION --------------------
 entity EXECUTION_STAGE is

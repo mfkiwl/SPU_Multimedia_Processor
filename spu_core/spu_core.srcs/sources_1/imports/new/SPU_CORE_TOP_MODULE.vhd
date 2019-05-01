@@ -78,7 +78,17 @@ signal DATA_OUT_LS                : STD_LOGIC_VECTOR((DATA_WIDTH-1) downto 0);
 signal INSTR_BLOCK_OUT_LS         : STD_LOGIC_VECTOR((INSTR_WIDTH_LS-1) downto 0);
 begin
 --======================================= INSTRUCTION FETCH STAGE ========================================--
-
+    IF_STAGE : INSTRUCTION_FETCH_STAGE port map (
+        -------------------- INPUTS --------------------
+        CLK                => ,
+        BRANCH             => ,
+        WRITE_CACHE_IF     => ,
+        PC_BRNCH           => ,
+        INSTR_BLOCK_IN_IF  => ,
+        -------------------- OUTPUTS --------------------
+        INSTR_PAIR_OUT_IF  => ,
+        PC_OUT             =>
+    );
     
 --============================================= DECODE STAGE =============================================--
 
@@ -88,6 +98,7 @@ begin
 
 --========================================= REGISTER FETCH STAGE =========================================--
     RF_STAGE : REGISTER_FETCH_STAGE port map ( 
+        -------------------- INPUTS --------------------
         CLK              => CLK,
         EVEN_OPCODE_RF   => EVEN_OPCODE,
         ODD_OPCODE_RF    => ODD_OPCODE,  

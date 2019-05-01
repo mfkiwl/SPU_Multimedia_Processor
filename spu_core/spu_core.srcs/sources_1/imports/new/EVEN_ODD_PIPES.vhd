@@ -27,40 +27,40 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
-use work.COMPONENTS_PACKAGE.ALL;   -- Contains result_packet Record
+use work.COMPONENTS_PACKAGE.ALL;
 use work.SPU_CORE_ISA_PACKAGE.ALL; -- Contains all instructions in ISA
 
 -------------------- ENTITY DEFINITION --------------------
 entity even_odd_pipes is
-port (
-    -------------------- INPUTS --------------------
-    CLK               : in STD_LOGIC; -- System Wide Synchronous 
-    EVEN_RI7_EOP      : in STD_LOGIC_VECTOR((RI7_WIDTH-1) downto 0);     -- Even Immediate RI7
-    EVEN_RI10_EOP     : in STD_LOGIC_VECTOR((RI10_WIDTH-1) downto 0);    -- Even Immediate RI10
-    EVEN_RI16_EOP     : in STD_LOGIC_VECTOR((RI16_WIDTH-1) downto 0);    -- Even Immediate RI16
-    EVEN_REG_DEST_EOP : in STD_LOGIC_VECTOR((ADDR_WIDTH-1) downto 0);    -- Even Write back Address (RT)
-    ODD_RI7_EOP       : in STD_LOGIC_VECTOR((RI7_WIDTH-1) downto 0);     -- Odd Immediate RI7
-    ODD_RI10_EOP      : in STD_LOGIC_VECTOR((RI10_WIDTH-1) downto 0);    -- Odd Immediate RI10
-    ODD_RI16_EOP      : in STD_LOGIC_VECTOR((RI16_WIDTH-1) downto 0);    -- Odd Immediate RI16
-    ODD_RI18_EOP      : in STD_LOGIC_VECTOR((RI18_WIDTH-1) downto 0);    -- Odd Immediate RI18
-    ODD_REG_DEST_EOP  : in STD_LOGIC_VECTOR((ADDR_WIDTH-1) downto 0);    -- Odd Write back Address (RT)
-    RA_EVEN_DATA_EOP  : in STD_LOGIC_VECTOR((DATA_WIDTH-1) downto 0);    -- Even Pipe RA Data
-    RB_EVEN_DATA_EOP  : in STD_LOGIC_VECTOR((DATA_WIDTH-1) downto 0);    -- Even Pipe RB Data
-    RC_EVEN_DATA_EOP  : in STD_LOGIC_VECTOR((DATA_WIDTH-1) downto 0);    -- Even Pipe RC Data    
-    RA_ODD_DATA_EOP   : in STD_LOGIC_VECTOR((DATA_WIDTH-1) downto 0);    -- Odd Pipe RA Data
-    RB_ODD_DATA_EOP   : in STD_LOGIC_VECTOR((DATA_WIDTH-1) downto 0);    -- Odd Pipe RB Data
-    RC_ODD_DATA_EOP   : in STD_LOGIC_VECTOR((DATA_WIDTH-1) downto 0);    -- Odd Pipe RC Data
-    EVEN_OPCODE_EOP   : in STD_LOGIC_VECTOR((OPCODE_WIDTH-1) downto 0);  -- Even Instruction Opcode
-    ODD_OPCODE_EOP    : in STD_LOGIC_VECTOR((OPCODE_WIDTH-1) downto 0);  -- Odd Instruction Opcode
-    LOCAL_STORE_DATA_EOP : in STD_LOGIC_VECTOR((DATA_WIDTH-1) downto 0); -- Data from Local Store
-    -------------------- OUTPUTS --------------------
-    LS_WE_OUT_EOP              : out STD_LOGIC := '0'; -- Local Store Write Enable Control Signal
-    LS_RIB_OUT_EOP             : out STD_LOGIC := '0'; -- Local Store Read Instruction Block Signal
-    LS_DATA_OUT_EOP            : out STD_LOGIC_VECTOR((DATA_WIDTH-1) downto 0)    := (others => '0');  -- Data to write into LS
-    LS_ADDR_OUT_EOP            : out STD_LOGIC_VECTOR((ADDR_WIDTH_LS-1) downto 0) := (others => '0');  -- Local Store Address
-    RESULT_PACKET_EVEN_OUT_EOP : out RESULT_PACKET_EVEN := ((others => '0'), (others => '0'), '0', 0); -- Result Packet from Even Execution Units 
-    RESULT_PACKET_ODD_OUT_EOP  : out RESULT_PACKET_ODD  := ((others => '0'), (others => '0'), '0', 0)  -- Result Packet from Odd Execution Units
-);
+    port (
+        -------------------- INPUTS --------------------
+        CLK               : in STD_LOGIC; -- System Wide Synchronous 
+        EVEN_RI7_EOP      : in STD_LOGIC_VECTOR((RI7_WIDTH-1) downto 0);     -- Even Immediate RI7
+        EVEN_RI10_EOP     : in STD_LOGIC_VECTOR((RI10_WIDTH-1) downto 0);    -- Even Immediate RI10
+        EVEN_RI16_EOP     : in STD_LOGIC_VECTOR((RI16_WIDTH-1) downto 0);    -- Even Immediate RI16
+        EVEN_REG_DEST_EOP : in STD_LOGIC_VECTOR((ADDR_WIDTH-1) downto 0);    -- Even Write back Address (RT)
+        ODD_RI7_EOP       : in STD_LOGIC_VECTOR((RI7_WIDTH-1) downto 0);     -- Odd Immediate RI7
+        ODD_RI10_EOP      : in STD_LOGIC_VECTOR((RI10_WIDTH-1) downto 0);    -- Odd Immediate RI10
+        ODD_RI16_EOP      : in STD_LOGIC_VECTOR((RI16_WIDTH-1) downto 0);    -- Odd Immediate RI16
+        ODD_RI18_EOP      : in STD_LOGIC_VECTOR((RI18_WIDTH-1) downto 0);    -- Odd Immediate RI18
+        ODD_REG_DEST_EOP  : in STD_LOGIC_VECTOR((ADDR_WIDTH-1) downto 0);    -- Odd Write back Address (RT)
+        RA_EVEN_DATA_EOP  : in STD_LOGIC_VECTOR((DATA_WIDTH-1) downto 0);    -- Even Pipe RA Data
+        RB_EVEN_DATA_EOP  : in STD_LOGIC_VECTOR((DATA_WIDTH-1) downto 0);    -- Even Pipe RB Data
+        RC_EVEN_DATA_EOP  : in STD_LOGIC_VECTOR((DATA_WIDTH-1) downto 0);    -- Even Pipe RC Data    
+        RA_ODD_DATA_EOP   : in STD_LOGIC_VECTOR((DATA_WIDTH-1) downto 0);    -- Odd Pipe RA Data
+        RB_ODD_DATA_EOP   : in STD_LOGIC_VECTOR((DATA_WIDTH-1) downto 0);    -- Odd Pipe RB Data
+        RC_ODD_DATA_EOP   : in STD_LOGIC_VECTOR((DATA_WIDTH-1) downto 0);    -- Odd Pipe RC Data
+        EVEN_OPCODE_EOP   : in STD_LOGIC_VECTOR((OPCODE_WIDTH-1) downto 0);  -- Even Instruction Opcode
+        ODD_OPCODE_EOP    : in STD_LOGIC_VECTOR((OPCODE_WIDTH-1) downto 0);  -- Odd Instruction Opcode
+        LOCAL_STORE_DATA_EOP : in STD_LOGIC_VECTOR((DATA_WIDTH-1) downto 0); -- Data from Local Store
+        -------------------- OUTPUTS --------------------
+        LS_WE_OUT_EOP              : out STD_LOGIC := '0'; -- Local Store Write Enable Control Signal
+        LS_RIB_OUT_EOP             : out STD_LOGIC := '0'; -- Local Store Read Instruction Block Signal
+        LS_DATA_OUT_EOP            : out STD_LOGIC_VECTOR((DATA_WIDTH-1) downto 0)    := (others => '0');  -- Data to write into LS
+        LS_ADDR_OUT_EOP            : out STD_LOGIC_VECTOR((ADDR_WIDTH_LS-1) downto 0) := (others => '0');  -- Local Store Address
+        RESULT_PACKET_EVEN_OUT_EOP : out RESULT_PACKET_EVEN := ((others => '0'), (others => '0'), '0', 0); -- Result Packet from Even Execution Units 
+        RESULT_PACKET_ODD_OUT_EOP  : out RESULT_PACKET_ODD  := ((others => '0'), (others => '0'), '0', 0)  -- Result Packet from Odd Execution Units
+    );
 end even_odd_pipes;
 
 -------------------- ARCHITECTURE DEFINITION --------------------

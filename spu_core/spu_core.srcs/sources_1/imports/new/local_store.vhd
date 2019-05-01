@@ -23,7 +23,7 @@ use IEEE.STD_LOGIC_UNSIGNED.ALL;
 use work.COMPONENTS_PACKAGE.ALL; -- SPU Core Components
 
 -------------------- ENTITY DEFINITION --------------------
-entity local_store is
+entity LOCAL_STORE is
     port (
         -------------------- INPUTS --------------------
         WE_LS      : in STD_LOGIC; -- Write Enable Control Signal
@@ -36,10 +36,10 @@ entity local_store is
         DATA_OUT_LS        : out STD_LOGIC_VECTOR((DATA_WIDTH-1) downto 0)  := (others => '0');   -- 16-Byte Data Read 
         INSTR_BLOCK_OUT_LS : out STD_LOGIC_VECTOR((INSTR_WIDTH_LS-1) downto 0) := (others => '0') -- 128-Byte Data Read (32 Instructions)
     );
-end local_store;
+end LOCAL_STORE;
 
 -------------------- ARCHITECTURE DEFINITION --------------------
-architecture behavioral of local_store is
+architecture behavioral of LOCAL_STORE is
 signal SRAM : sram_type := (others => (others => '0'));
 -- Current Instruction Block Address --
 signal INSTRUCTION_BLOCK_ADDR : STD_LOGIC_VECTOR((ADDR_WIDTH_LS-1) downto 0) := (others => '0');

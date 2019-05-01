@@ -7,16 +7,16 @@ use STD.TEXTIO.all;
 use work.COMPONENTS_PACKAGE.ALL; -- SPU Core Components
 
 -------------------- ENTITY DEFINITION --------------------
-entity cache_miss_test_TB is
+entity ls_fill_test_TB is
 generic (
     INSTR_WIDTH     : NATURAL := 32;  -- Width of a single instruction
     LINE_WIDTH      : NATURAL := 128; -- Width of 4 Instructions (Signle LS Line)
     INSTR_COUNT_MAX : NATURAL := 4    -- Maximum Instruction Count per LS Line
 );
-end cache_miss_test_TB;
+end ls_fill_test_TB;
 
 -------------------- ARCHITECTURE DEFINITION --------------------
-architecture behavioral of cache_miss_test_TB is
+architecture behavioral of ls_fill_test_TB is
 -------------------- INPUTS --------------------
 signal CLK           : STD_LOGIC := '1';
 signal FILL          : STD_LOGIC;
@@ -32,7 +32,7 @@ signal LS_ADDR_OUT_EOP        : STD_LOGIC_VECTOR((ADDR_WIDTH_LS-1) downto 0)  :=
 signal INSTR_BLOCK_OUT_LS     : STD_LOGIC_VECTOR((INSTR_WIDTH_LS-1) downto 0) := (others => '0');
 -------------------- CLOCK --------------------
 constant CLK_PERIOD : TIME := 10ns;
-begin    
+begin        
     ------------------ INSTANTIATE LOCAL STORE --------------------
     ls : local_store port map (
         ----- INPUTS -----
@@ -98,6 +98,8 @@ begin
         end if;
         
         file_close(file_MACHINE_CODE);
+        
+        
         wait;
     end process FILL_LS_PROC;
 end behavioral;

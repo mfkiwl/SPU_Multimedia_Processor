@@ -6,21 +6,36 @@ use IEEE.NUMERIC_STD.ALL;
 -------------------- PACKAGE DECLARATION --------------------
 package COMPONENTS_PACKAGE is
     ----- COMPONENT CONSTANTS -----
-    constant ADDR_WIDTH     : NATURAL := 7;    -- Bit-width of the Register Addresses
-    constant DATA_WIDTH     : NATURAL := 128;  -- Bit-width of the Register Data - Register File
-    constant OPCODE_WIDTH   : NATURAL := 11;   -- Maximum Bit-width of Opcode
-    constant RI7_WIDTH      : NATURAL := 7;    -- Immediate 7-bit format
-    constant RI10_WIDTH     : NATURAL := 10;   -- Immediate 10-bit format
-    constant RI16_WIDTH     : NATURAL := 16;   -- Immediate 16-bit format
-    constant RI18_WIDTH     : NATURAL := 18;   -- Immediate 18-bit format
-    constant ADDR_WIDTH_LS  : NATURAL := 4;   -- Bit-width of the SRAM Addresses - Local Store
-    constant INSTR_WIDTH_LS : NATURAL := 1024; -- Bit-width of Instruction Block - Local Store
-    constant STORAGE_SIZE   : NATURAL := 2048; -- Block Amount
-    constant FC_DEPTH       : NATURAL := 7+1;  -- Number of Forwarding Circuit Stages 7 + WB Stage
+    constant ADDR_WIDTH      : NATURAL := 7;    -- Bit-width of the Register Addresses
+    constant DATA_WIDTH      : NATURAL := 128;  -- Bit-width of the Register Data - Register File
+    constant OPCODE_WIDTH    : NATURAL := 11;   -- Maximum Bit-width of Opcode
+    constant RI7_WIDTH       : NATURAL := 7;    -- Immediate 7-bit format
+    constant RI10_WIDTH      : NATURAL := 10;   -- Immediate 10-bit format
+    constant RI16_WIDTH      : NATURAL := 16;   -- Immediate 16-bit format
+    constant RI18_WIDTH      : NATURAL := 18;   -- Immediate 18-bit format
+    constant ADDR_WIDTH_LS   : NATURAL := 4;    -- Bit-width of the SRAM Addresses - Local Store
+    constant INSTR_WIDTH_LS  : NATURAL := 1024; -- Bit-width of Instruction Block - Local Store
+    constant STORAGE_SIZE    : NATURAL := 2048; -- Block Amount
+    constant FC_DEPTH        : NATURAL := 7+1;  -- Number of Forwarding Circuit Stages 7 + WB Stage
+    constant INSTR_PAIR_SIZE : NATURAL := 64;   -- Size of instrucion pair from instruction cache
+    constant CACHE_TAG_SIZE  : NATURAL := 3;    -- Size of the cache entry TAGS
+    constant CACHE_HEIGHT    : NATURAL := 16;   -- Number of entries in instruction cache
+    constant CACHE_SIZE      : NATURAL := 16*8; -- 16 Cache entries & 8 byte blocks
+    constant LS_INSTR_SECTION_SIZE : NATURAL := 10; -- 10 bits (1024 instructions max in LS (in code section))
+    
+    -- Instruction cache entry record --
+    type cache_entry is record
+    V    : STD_LOGIC; -- Block valid flag
+    TAG  : STD_LOGIC_VECTOR((CACHE_TAG_SIZE-1) downto 0);  -- LS Address MS 5 bits 
+    DATA : STD_LOGIC_VECTOR((INSTR_PAIR_SIZE-1) downto 0); -- Cached instruction pair
+    end record cache_entry;
+    
+    -- Instruction cache type --
+    type instr_cache_type is array (0 to (CACHE_HEIGHT-1)) of cache_entry;
     
     -- 2kB x 16-byte block Storage --
     -- Local Store Data Section Start Address: 0x400 -- 
-    -- Local Store Data Section End Address: 0x780 --
+    -- Local Store Data Section End Address: 0x7ff --
     type sram_type is array (0 to (STORAGE_SIZE-1)) of STD_LOGIC_VECTOR ((DATA_WIDTH-1) downto 0);
    
     ----- EVEN EXECUTION UNITS RESULT PACKET -----
@@ -45,7 +60,7 @@ package COMPONENTS_PACKAGE is
     ----- Forwarding Circuit Array Type - Odd -----
     type FC_ODD is array (0 to (FC_DEPTH-1)) of result_packet_odd;
     
-    ----- SPU CORE TOP COMPONENT -----
+    -------------------- SPU CORE TOP COMPONENT --------------------
     component SPU_CORE_TOP_MODULE 
         port (
             -------------------- INPUTS --------------------
@@ -78,6 +93,7 @@ package COMPONENTS_PACKAGE is
         );
     end component SPU_CORE_TOP_MODULE;
     
+    -------------------- RF STAGE COMPOINENT --------------------
     component REGISTER_FETCH_STAGE
         port (
             -------------------- INPUTS --------------------
@@ -127,6 +143,21 @@ package COMPONENTS_PACKAGE is
             ODD_REG_DEST_OUT_RF  : out STD_LOGIC_VECTOR((ADDR_WIDTH-1) downto 0)   := (others => '0')
         );
     end component REGISTER_FETCH_STAGE;
+    
+    -------------------- IF STAGE COMPONENT --------------------
+    component INSTRUCTION_FETCH_STAGE is
+        port (
+            -------------------- INPUTS --------------------
+            CLK               : in STD_LOGIC; 
+            BRANCH            : in STD_LOGIC; 
+            WRITE_CACHE_IF    : in STD_LOGIC; 
+            PC_BRNCH          : in STD_LOGIC_VECTOR((LS_INSTR_SECTION_SIZE - 1) downto 0); 
+            INSTR_BLOCK_IN_IF : in STD_LOGIC_VECTOR((INSTR_WIDTH_LS-1) downto 0);
+            -------------------- OUTPUTS --------------------
+            INSTR_PAIR_OUT_IF : out STD_LOGIC_VECTOR((INSTR_PAIR_SIZE-1) downto 0) := (others => '0');
+            PC_OUT            : out STD_LOGIC_VECTOR((LS_INSTR_SECTION_SIZE - 1) downto 0) := (others => '0')
+        );
+    end component INSTRUCTION_FETCH_STAGE;
     
     ----- REGISTER FILE COMPONENT -----
     component register_file 
@@ -237,6 +268,20 @@ package COMPONENTS_PACKAGE is
             INSTR_BLOCK_OUT_LS : out STD_LOGIC_VECTOR((INSTR_WIDTH_LS-1) downto 0) := (others => '0') 
         );
     end component local_store;
+    
+    ----- INSTRUCTION CACHE COMPONENT -----
+    component instruction_cache
+        port(
+            -------------------- INPUTS --------------------
+            CLK         : in STD_LOGIC;
+            ADDR        : in STD_LOGIC_VECTOR((LS_INSTR_SECTION_SIZE - 1) downto 0);
+            WRITE_CACHE : in STD_LOGIC;
+            INSTR_BLOCK : in STD_LOGIC_VECTOR((INSTR_WIDTH_LS-1) downto 0); 
+            -------------------- OUTPUTS --------------------
+            HIT         : out STD_LOGIC;
+            DATA_OUT    : out STD_LOGIC_VECTOR((INSTR_PAIR_SIZE-1) downto 0)
+        );
+    end component instruction_cache;
     
     ----- FORWARDING MACRO/CIRCUIS COMPONENT -----
     component forwarding_macro_circuits 

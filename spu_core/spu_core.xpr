@@ -33,7 +33,7 @@
     <Option Name="DSAVendor" Val="xilinx"/>
     <Option Name="DSABoardId" Val="basys3"/>
     <Option Name="DSANumComputeUnits" Val="60"/>
-    <Option Name="WTXSimLaunchSim" Val="45"/>
+    <Option Name="WTXSimLaunchSim" Val="253"/>
     <Option Name="WTModelSimLaunchSim" Val="0"/>
     <Option Name="WTQuestaLaunchSim" Val="0"/>
     <Option Name="WTIesLaunchSim" Val="0"/>
@@ -93,6 +93,14 @@
           <Attr Name="UsedIn" Val="simulation"/>
         </FileInfo>
       </File>
+      <File Path="$PSRCDIR/sources_1/imports/new/INSTRUCTION_FETCH_STAGE.vhd">
+        <FileInfo SFType="VHDL2008">
+          <Attr Name="ImportPath" Val="$PPRDIR/../Users/Wilmer Suarez/Desktop/sources_1/new/INSTRUCTION_FETCH_STAGE.vhd"/>
+          <Attr Name="ImportTime" Val="1554801920"/>
+          <Attr Name="UsedIn" Val="synthesis"/>
+          <Attr Name="UsedIn" Val="simulation"/>
+        </FileInfo>
+      </File>
       <File Path="$PSRCDIR/sources_1/imports/new/REGISTER_FETCH_STAGE.vhd">
         <FileInfo SFType="VHDL2008">
           <Attr Name="ImportPath" Val="$PPRDIR/../Users/Wilmer Suarez/Desktop/sources_1/new/REGISTER_FETCH_STAGE.vhd"/>
@@ -105,6 +113,14 @@
         <FileInfo SFType="VHDL2008">
           <Attr Name="ImportPath" Val="$PPRDIR/../Users/Wilmer Suarez/Desktop/sources_1/new/forwarding_macro_circuits.vhd"/>
           <Attr Name="ImportTime" Val="1555229912"/>
+          <Attr Name="UsedIn" Val="synthesis"/>
+          <Attr Name="UsedIn" Val="simulation"/>
+        </FileInfo>
+      </File>
+      <File Path="$PSRCDIR/sources_1/imports/new/instruction_cache.vhd">
+        <FileInfo SFType="VHDL2008">
+          <Attr Name="ImportPath" Val="$PPRDIR/../Users/Wilmer Suarez/Desktop/sources_1/new/instruction_cache.vhd"/>
+          <Attr Name="ImportTime" Val="1554801581"/>
           <Attr Name="UsedIn" Val="synthesis"/>
           <Attr Name="UsedIn" Val="simulation"/>
         </FileInfo>
@@ -152,33 +168,6 @@
           <Attr Name="UsedIn" Val="simulation"/>
         </FileInfo>
       </File>
-      <File Path="$PSRCDIR/sources_1/imports/new/INSTRUCTION_FETCH_STAGE.vhd">
-        <FileInfo SFType="VHDL2008">
-          <Attr Name="AutoDisabled" Val="1"/>
-          <Attr Name="ImportPath" Val="$PPRDIR/../Users/Wilmer Suarez/Desktop/sources_1/new/INSTRUCTION_FETCH_STAGE.vhd"/>
-          <Attr Name="ImportTime" Val="1554801920"/>
-          <Attr Name="UsedIn" Val="synthesis"/>
-          <Attr Name="UsedIn" Val="simulation"/>
-        </FileInfo>
-      </File>
-      <File Path="$PSRCDIR/sources_1/imports/new/instruction_cache.vhd">
-        <FileInfo SFType="VHDL2008">
-          <Attr Name="AutoDisabled" Val="1"/>
-          <Attr Name="ImportPath" Val="$PPRDIR/../Users/Wilmer Suarez/Desktop/sources_1/new/instruction_cache.vhd"/>
-          <Attr Name="ImportTime" Val="1554801581"/>
-          <Attr Name="UsedIn" Val="synthesis"/>
-          <Attr Name="UsedIn" Val="simulation"/>
-        </FileInfo>
-      </File>
-      <File Path="$PSRCDIR/sources_1/imports/new/decoder.vhd">
-        <FileInfo SFType="VHDL2008">
-          <Attr Name="AutoDisabled" Val="1"/>
-          <Attr Name="ImportPath" Val="$PPRDIR/../Users/Wilmer Suarez/Desktop/sources_1/new/decoder.vhd"/>
-          <Attr Name="ImportTime" Val="1554801615"/>
-          <Attr Name="UsedIn" Val="synthesis"/>
-          <Attr Name="UsedIn" Val="simulation"/>
-        </FileInfo>
-      </File>
       <Config>
         <Option Name="DesignMode" Val="RTL"/>
         <Option Name="TopModule" Val="SPU_CORE_TOP_MODULE"/>
@@ -193,10 +182,15 @@
     </FileSet>
     <FileSet Name="sim_1" Type="SimulationSrcs" RelSrcDir="$PSRCDIR/sim_1">
       <Filter Type="Srcs"/>
-      <File Path="$PSRCDIR/sim_1/imports/Desktop/sources_1/new/SPU_CORE_TOP_MODULE_TB.vhd">
+      <File Path="$PSRCDIR/sim_1/new/TEST_IC_TB.vhd">
         <FileInfo SFType="VHDL2008">
-          <Attr Name="ImportPath" Val="$PPRDIR/../Users/Wilmer Suarez/Desktop/sources_1/new/SPU_CORE_TOP_MODULE_TB.vhd"/>
-          <Attr Name="ImportTime" Val="1555219401"/>
+          <Attr Name="UsedIn" Val="synthesis"/>
+          <Attr Name="UsedIn" Val="simulation"/>
+        </FileInfo>
+      </File>
+      <File Path="$PSRCDIR/sim_1/new/cache_miss_test_TB.vhd">
+        <FileInfo SFType="VHDL2008">
+          <Attr Name="AutoDisabled" Val="1"/>
           <Attr Name="UsedIn" Val="synthesis"/>
           <Attr Name="UsedIn" Val="simulation"/>
         </FileInfo>
@@ -210,11 +204,11 @@
           <Attr Name="UsedIn" Val="simulation"/>
         </FileInfo>
       </File>
-      <File Path="$PSRCDIR/sim_1/imports/Desktop/new/forwarding_even_odd_pipe_TB.vhd">
+      <File Path="$PSRCDIR/sim_1/imports/Desktop/sources_1/new/SPU_CORE_TOP_MODULE_TB.vhd">
         <FileInfo SFType="VHDL2008">
           <Attr Name="AutoDisabled" Val="1"/>
-          <Attr Name="ImportPath" Val="$PPRDIR/../Users/Wilmer Suarez/Desktop/new/forwarding_even_odd_pipe_TB.vhd"/>
-          <Attr Name="ImportTime" Val="1554251502"/>
+          <Attr Name="ImportPath" Val="$PPRDIR/../Users/Wilmer Suarez/Desktop/sources_1/new/SPU_CORE_TOP_MODULE_TB.vhd"/>
+          <Attr Name="ImportTime" Val="1555219401"/>
           <Attr Name="UsedIn" Val="synthesis"/>
           <Attr Name="UsedIn" Val="simulation"/>
         </FileInfo>
@@ -257,7 +251,7 @@
       </File>
       <Config>
         <Option Name="DesignMode" Val="RTL"/>
-        <Option Name="TopModule" Val="SPU_CORE_TOP_MODULE_TB"/>
+        <Option Name="TopModule" Val="TEST_IC_TB"/>
         <Option Name="TopLib" Val="xil_defaultlib"/>
         <Option Name="TransportPathDelay" Val="0"/>
         <Option Name="TransportIntDelay" Val="0"/>
