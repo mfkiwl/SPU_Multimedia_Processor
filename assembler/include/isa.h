@@ -51,7 +51,7 @@ typedef union {
         unsigned RI18: 18; // Operand Immediate 18 bits
         const unsigned op: 7;
     } RI18_bf;
-    unsigned instr; // Full 32-bit Instruction Binary Machine Code 
+    unsigned instr; // Full 32-bit Instruction
 } bin_format;
 
 /* ISA - Instruction Table */

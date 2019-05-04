@@ -2,27 +2,11 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
+use work.CONSTANTS_PACKAGE.ALL;
+use work.SPU_CORE_ISA_PACKAGE.ALL;
 
 -------------------- PACKAGE DECLARATION --------------------
-package COMPONENTS_PACKAGE is
-    ----- COMPONENT CONSTANTS -----
-    constant ADDR_WIDTH      : NATURAL := 7;    -- Bit-width of the Register Addresses
-    constant DATA_WIDTH      : NATURAL := 128;  -- Bit-width of the Register Data - Register File
-    constant OPCODE_WIDTH    : NATURAL := 11;   -- Maximum Bit-width of Opcode
-    constant RI7_WIDTH       : NATURAL := 7;    -- Immediate 7-bit format
-    constant RI10_WIDTH      : NATURAL := 10;   -- Immediate 10-bit format
-    constant RI16_WIDTH      : NATURAL := 16;   -- Immediate 16-bit format
-    constant RI18_WIDTH      : NATURAL := 18;   -- Immediate 18-bit format
-    constant ADDR_WIDTH_LS   : NATURAL := 4;    -- Bit-width of the SRAM Addresses - Local Store
-    constant INSTR_WIDTH_LS  : NATURAL := 1024; -- Bit-width of Instruction Block - Local Store
-    constant STORAGE_SIZE    : NATURAL := 2048; -- Block Amount
-    constant FC_DEPTH        : NATURAL := 7+1;  -- Number of Forwarding Circuit Stages 7 + WB Stage
-    constant INSTR_PAIR_SIZE : NATURAL := 64;   -- Size of instrucion pair from instruction cache
-    constant CACHE_TAG_SIZE  : NATURAL := 3;    -- Size of the cache entry TAGS
-    constant CACHE_HEIGHT    : NATURAL := 16;   -- Number of entries in instruction cache
-    constant CACHE_SIZE      : NATURAL := 16*8; -- 16 Cache entries & 8 byte blocks
-    constant LS_INSTR_SECTION_SIZE : NATURAL := 10; -- 10 bits (1024 instructions max in LS (in code section))
-    
+package COMPONENTS_PACKAGE is    
     -- Instruction cache entry record --
     type cache_entry is record
     V    : STD_LOGIC; -- Block valid flag
@@ -148,16 +132,39 @@ package COMPONENTS_PACKAGE is
     component INSTRUCTION_FETCH_STAGE is
         port (
             -------------------- INPUTS --------------------
-            CLK               : in STD_LOGIC; 
-            BRANCH            : in STD_LOGIC; 
+            CLK               : in STD_LOGIC;
+            STALL_D           : in STD_LOGIC;
+            STALL_DEP         : in STD_LOGIC;
+            BRANCH_FLUSH      : in STD_LOGIC;
             WRITE_CACHE_IF    : in STD_LOGIC; 
             PC_BRNCH          : in STD_LOGIC_VECTOR((LS_INSTR_SECTION_SIZE - 1) downto 0); 
             INSTR_BLOCK_IN_IF : in STD_LOGIC_VECTOR((INSTR_WIDTH_LS-1) downto 0);
             -------------------- OUTPUTS --------------------
+            STALL_RIB         : out STD_LOGIC := '0';
             INSTR_PAIR_OUT_IF : out STD_LOGIC_VECTOR((INSTR_PAIR_SIZE-1) downto 0) := (others => '0');
             PC_OUT            : out STD_LOGIC_VECTOR((LS_INSTR_SECTION_SIZE - 1) downto 0) := (others => '0')
         );
     end component INSTRUCTION_FETCH_STAGE;
+    
+    -------------------- DECODE STAGE COMPONENT --------------------
+    component DECODE_STAGE is 
+        port (
+            -------------------- INPUTS --------------------
+            CLK            : in STD_LOGIC; 
+            STALL_IF       : in STD_LOGIC;
+            FLUSH          : in STD_LOGIC;
+            INSTR_PAIR_IN  : in STD_LOGIC_VECTOR((INSTR_PAIR_SIZE-1) downto 0);
+            PC_IN          : in STD_LOGIC_VECTOR((LS_INSTR_SECTION_SIZE - 1) downto 0);
+            -------------------- OUTPUTS --------------------
+            STALL_OUT      : out STD_LOGIC := '0';
+            STALL_E_O      : out STD_LOGIC := '0';
+            PC_OUT         : out STD_LOGIC_VECTOR((LS_INSTR_SECTION_SIZE - 1) downto 0) := (others => '0');
+            INSTR_EVEN_OUT   : out INSTR_DATA := ("00000000001", SIMPLE_FIXED_1, (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'));
+            INSTR_ODD_OUT    : out INSTR_DATA := ("01000000001", PERMUTE, (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'));
+            INSTR_EVEN_STALL : out INSTR_DATA := ("00000000001", SIMPLE_FIXED_1, (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'));
+            INSTR_ODD_STALL  : out INSTR_DATA := ("01000000001", PERMUTE, (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'))
+        );
+    end component DECODE_STAGE;
     
     ----- REGISTER FILE COMPONENT -----
     component register_file 
@@ -244,6 +251,8 @@ package COMPONENTS_PACKAGE is
             ODD_REG_DEST_EXE  : in STD_LOGIC_VECTOR((ADDR_WIDTH-1) downto 0);
             LS_DATA_IN        : in STD_LOGIC_VECTOR((DATA_WIDTH-1) downto 0); 
             -------------------- OUTPUTS --------------------
+            PC_BRNCH                  : out STD_LOGIC_VECTOR((LS_INSTR_SECTION_SIZE - 1) downto 0);
+            BRANCH_FLUSH              : out STD_LOGIC;
             RESULT_PACKET_EVEN_OUT_FC : out RESULT_PACKET_EVEN := ((others => '0'), (others => '0'), '0', 0);
             RESULT_PACKET_ODD_OUT_FC  : out RESULT_PACKET_ODD  := ((others => '0'), (others => '0'), '0', 0);
             LS_WE_OUT_EOP          : out STD_LOGIC;
@@ -273,13 +282,14 @@ package COMPONENTS_PACKAGE is
     component instruction_cache
         port(
             -------------------- INPUTS --------------------
-            CLK         : in STD_LOGIC;
-            ADDR        : in STD_LOGIC_VECTOR((LS_INSTR_SECTION_SIZE - 1) downto 0);
-            WRITE_CACHE : in STD_LOGIC;
-            INSTR_BLOCK : in STD_LOGIC_VECTOR((INSTR_WIDTH_LS-1) downto 0); 
+            CLK          : in STD_LOGIC;
+            BRANCH_FLUSH : in STD_LOGIC;
+            ADDR         : in STD_LOGIC_VECTOR((LS_INSTR_SECTION_SIZE - 1) downto 0);
+            WRITE_CACHE  : in STD_LOGIC;
+            INSTR_BLOCK  : in STD_LOGIC_VECTOR((INSTR_WIDTH_LS-1) downto 0); 
             -------------------- OUTPUTS --------------------
-            HIT         : out STD_LOGIC;
-            DATA_OUT    : out STD_LOGIC_VECTOR((INSTR_PAIR_SIZE-1) downto 0)
+            HIT          : out STD_LOGIC;
+            DATA_OUT     : out STD_LOGIC_VECTOR((INSTR_PAIR_SIZE-1) downto 0)
         );
     end component instruction_cache;
     
@@ -362,6 +372,8 @@ package COMPONENTS_PACKAGE is
             ODD_OPCODE_EOP    : in STD_LOGIC_VECTOR((OPCODE_WIDTH-1) downto 0);  
             LOCAL_STORE_DATA_EOP : in STD_LOGIC_VECTOR((DATA_WIDTH-1) downto 0);
             -------------------- OUTPUTS --------------------
+            PC_BRNCH                   : out STD_LOGIC_VECTOR((LS_INSTR_SECTION_SIZE - 1) downto 0);
+            BRANCH_FLUSH               : out STD_LOGIC := '0';
             LS_WE_OUT_EOP              : out STD_LOGIC := '0'; 
             LS_RIB_OUT_EOP             : out STD_LOGIC := '0'; 
             LS_DATA_OUT_EOP            : out STD_LOGIC_VECTOR((DATA_WIDTH-1) downto 0)    := (others => '0'); 
@@ -371,21 +383,19 @@ package COMPONENTS_PACKAGE is
         );
     end component EVEN_ODD_PIPES;
     
-    ----- The Function Checks the Forwarding Circuits for Dependencies -----
-    function check_dep(
-        EVEN_FC : FC_EVEN; -- Even Forwarding Circuit
-        ODD_FC : FC_ODD;   -- Odd Forwarding Circuit
-        ADDR : STD_LOGIC_VECTOR((ADDR_WIDTH-1) downto 0);    -- Register Address being Evaluated
-        DATA_IN : STD_LOGIC_VECTOR((DATA_WIDTH-1) downto 0)) -- Data from Register File
-    return STD_LOGIC_VECTOR;
-                       
+    ----- Checks the Forwarding Circuits for Dependencies -----
+    function check_dep(EVEN_FC : FC_EVEN; -- Even Forwarding Circuit
+                       ODD_FC  : FC_ODD;   -- Odd Forwarding Circuit
+                       ADDR    : STD_LOGIC_VECTOR((ADDR_WIDTH-1) downto 0);    -- Register Address being Evaluated
+                       DATA_IN : STD_LOGIC_VECTOR((DATA_WIDTH-1) downto 0)) -- Data from Register File
+    return STD_LOGIC_VECTOR;       
 end package COMPONENTS_PACKAGE;
 
 package body COMPONENTS_PACKAGE is
-    ----- The Function Checks the Forwarding Circuits for Dependencies -----
+    ----- Checks the Forwarding Circuits for Dependencies -----
     function check_dep(EVEN_FC : FC_EVEN; -- Even Forwarding Circuit
-                       ODD_FC : FC_ODD;   -- Odd Forwarding Circuit
-                       ADDR : STD_LOGIC_VECTOR((ADDR_WIDTH-1) downto 0);    -- Register Address being Evaluated
+                       ODD_FC  : FC_ODD;   -- Odd Forwarding Circuit
+                       ADDR    : STD_LOGIC_VECTOR((ADDR_WIDTH-1) downto 0);    -- Register Address being Evaluated
                        DATA_IN : STD_LOGIC_VECTOR((DATA_WIDTH-1) downto 0)) -- Data from Register File
                        return STD_LOGIC_VECTOR is
         variable DATA_OUT : STD_LOGIC_VECTOR((DATA_WIDTH-1) downto 0) := (others => '0'); -- Data to be Forwarded

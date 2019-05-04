@@ -21,6 +21,7 @@ use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
 use IEEE.STD_LOGIC_UNSIGNED.ALL;
 use work.COMPONENTS_PACKAGE.ALL; -- SPU Core Components
+use work.CONSTANTS_PACKAGE.ALL;
 
 -------------------- ENTITY DEFINITION --------------------
 entity LOCAL_STORE is

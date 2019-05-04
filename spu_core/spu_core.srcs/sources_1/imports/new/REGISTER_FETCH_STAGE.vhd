@@ -10,6 +10,7 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.all;
 use work.COMPONENTS_PACKAGE.ALL; -- Contains result_packet Record
+use work.CONSTANTS_PACKAGE.ALL;
 
 -------------------- ENTITY DEFINITION --------------------
 entity REGISTER_FETCH_STAGE is

@@ -2,156 +2,360 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
+use work.CONSTANTS_PACKAGE.ALL;
 
 -------------------- PACKAGE DECLARATION --------------------
 package SPU_CORE_ISA_PACKAGE is
------ COMPONENT CONSTANTS -----
-constant OPCODE_WIDTH_4  : NATURAL := 4;  -- 4 bit-width Opcodes
-constant OPCODE_WIDTH_7  : NATURAL := 7;  -- 7 bit-width Opcodes
-constant OPCODE_WIDTH_8  : NATURAL := 8;  -- 8 bit-width Opcodes
-constant OPCODE_WIDTH_9  : NATURAL := 9;  -- 9 bit-width Opcodes
-constant OPCODE_WIDTH_11 : NATURAL := 11; -- 11 bit-width Opcodes
-
-constant OPCODE_WIDTH_4_COUNT  : NATURAL := 4;  -- 4 bit-width Opcodes Count
-constant OPCODE_WIDTH_7_COUNT  : NATURAL := 1;  -- 7 bit-width Opcodes Count
-constant OPCODE_WIDTH_8_COUNT  : NATURAL := 11; -- 8 bit-width Opcodes Count
-constant OPCODE_WIDTH_9_COUNT  : NATURAL := 9;  -- 9 bit-width Opcodes Count
-constant OPCODE_WIDTH_11_COUNT : NATURAL := 43; -- 11 bit-width Opcodes Count
-
-constant TOTAL_INSTR  : NATURAL := 68; -- Total Number of Instructions in the ISA
--- EXECUTION UNIT LATENCIES --
-constant SIMPLE_FIXED_1_L     : NATURAL := 2;
-constant SIMPLE_FIXED_2_L     : NATURAL := 4;
-constant SINGE_PRECISION_FP_L : NATURAL := 6;
-constant SINGE_PRECISION_I_L  : NATURAL := 7;
-constant BYTE_L               : NATURAL := 4;
-constant PERMUTE_L            : NATURAL := 4;
-constant LOCAL_STORE_L        : NATURAL := 6;
-constant BRANCH_L             : NATURAL := 4;
-constant NOP_L                : NATURAL := 0;
-
--- Execution Units --
-type EXE_UNIT is (SIMPLE_FIXED_1, SIMPLE_FIXED_2, SINGE_PRECISION, BYTE, PERMUTE, LOCAL_STORE, BRANCH, CONTROL);
+----- Execution Units -----
+type EXE_UNIT is (SIMPLE_FIXED_1, SIMPLE_FIXED_2, SINGE_PRECISION, BYTE, PERMUTE, LOCAL_STORE, BRANCH, HALT);
 type FORMAT is (RR, RRR, RI7, RI10, RI16, RI18);
 
+----- INSTRUCTION DATA -----
+type INSTR_DATA is record
+    OP_CODE  : STD_LOGIC_VECTOR((OPCODE_WIDTH-1) downto 0); -- Instruction Opcode
+    UNIT     : EXE_UNIT; -- Execution Unit Type
+    RA_ADDR  : STD_LOGIC_VECTOR((ADDR_WIDTH-1) downto 0); -- RA Register File Address
+    RB_ADDR  : STD_LOGIC_VECTOR((ADDR_WIDTH-1) downto 0); -- RB Register File Address
+    RC_ADDR  : STD_LOGIC_VECTOR((ADDR_WIDTH-1) downto 0); -- RC Register File Address
+    RI7      : STD_LOGIC_VECTOR((RI7_WIDTH-1) downto 0);  -- Immediate 7-bit
+    RI10     : STD_LOGIC_VECTOR((RI10_WIDTH-1) downto 0); -- Immediate 10-bit
+    RI16     : STD_LOGIC_VECTOR((RI16_WIDTH-1) downto 0); -- Immediate 16-bit
+    RI18     : STD_LOGIC_VECTOR((RI18_WIDTH-1) downto 0); -- Immediate 18-bit
+    REG_DEST : STD_LOGIC_VECTOR((ADDR_WIDTH-1) downto 0); -- Destination Register
+    INSTR    : STD_LOGIC_VECTOR((INSTR_SIZE-1) downto 0); -- Full 32-bit Instruction
+end record;
+
 ----- INSTRUCTION STRUCTURE -----
-type INSTR_4 is record
-    OPCODE : STD_LOGIC_VECTOR((OPCODE_WIDTH_4-1) downto 0); -- Instruction Op-code
+type INSTR_STRUCTURE is record
+    OPCODE : STD_LOGIC_VECTOR((OPCODE_WIDTH-1) downto 0); -- Instruction Op-code
     UNIT   : EXE_UNIT; -- Execution Unit Type
     FORMAT : FORMAT;   -- Instruction Format
-end record INSTR_4;
+    HALT   : STD_LOGIC; -- Flag for STOP instruction
+end record INSTR_STRUCTURE;
 
-type ISA_4 is array (0 to (OPCODE_WIDTH_4_COUNT-1)) of INSTR_4; 
+----- INSTRUCTION PAIR STRUCTURE -----
+type INSTR_PAIR_STRUCTURE is record
+    EVEN_S        : INSTR_STRUCTURE; -- Even Pipe Instruction
+    EVEN_INSTR    : STD_LOGIC_VECTOR((INSTR_SIZE-1) downto 0); -- Full 32-bit Even Instruction
+    ODD_S         : INSTR_STRUCTURE; -- Odd Pipe Instruction
+    ODD_INSTR     : STD_LOGIC_VECTOR((INSTR_SIZE-1) downto 0); -- Full 32-bit Odd Instruction
+    STRUCT_HAZARD : STD_LOGIC; -- Structural hazard flag
+    HAZARD_E_O    : STD_LOGIC; -- Hazard in Odd or Even Pipe? 
+end record INSTR_PAIR_STRUCTURE;
+
+type ISA_4 is array (0 to (OPCODE_WIDTH_4_COUNT-1)) of INSTR_STRUCTURE; 
 constant ISA_TABLE_4 : ISA_4 := (
-    (x"C", SINGE_PRECISION, RRR), -- Multiply and Add
-    (x"E", SINGE_PRECISION, RRR), -- Floating Multiply and Add
-    (x"D", SINGE_PRECISION, RRR), -- Floating Negative Multiply and Subtract
-    (x"F", SINGE_PRECISION, RRR)  -- Floating Multiply and Subtract
+    ("-------1100", SINGE_PRECISION, RRR, '0'), -- Multiply and Add
+    ("-------1110", SINGE_PRECISION, RRR, '0'), -- Floating Multiply and Add
+    ("-------1101", SINGE_PRECISION, RRR, '0'), -- Floating Negative Multiply and Subtract
+    ("-------1111", SINGE_PRECISION, RRR, '0')  -- Floating Multiply and Subtract
 );
 
------ INSTRUCTION STRUCTURE -----
-type INSTR_7 is record
-    OPCODE : STD_LOGIC_VECTOR((OPCODE_WIDTH_7-1) downto 0); -- Instruction Op-code
-    UNIT   : EXE_UNIT; -- Execution Unit Type
-    FORMAT : FORMAT;   -- Instruction Format
-end record INSTR_7;
+constant ISA_TABLE_7: INSTR_STRUCTURE := ("----0100001", LOCAL_STORE, RI18, '0'); -- Immediate load Address
 
-constant ISA_TABLE_7 : INSTR_7 := (STD_LOGIC_VECTOR(to_unsigned(16#21#, OPCODE_WIDTH_7)), LOCAL_STORE, RI18); -- Immediate load Address
-
------ INSTRUCTION STRUCTURE -----
-type INSTR_8 is record
-    OPCODE : STD_LOGIC_VECTOR((OPCODE_WIDTH_8-1) downto 0); -- Instruction Op-code
-    UNIT   : EXE_UNIT; -- Execution Unit Type
-    FORMAT : FORMAT;   -- Instruction Format
-end record INSTR_8;
-
-type ISA_8 is array (0 to (OPCODE_WIDTH_8_COUNT-1)) of INSTR_8; 
+type ISA_8 is array (0 to (OPCODE_WIDTH_8_COUNT-1)) of INSTR_STRUCTURE; 
 constant ISA_TABLE_8 : ISA_8 := (
-    (x"34", LOCAL_STORE, RI10),     -- Load Quadword (d-form),
-    (x"24", LOCAL_STORE, RI10),     -- Store Quadword (d-form)
-    (x"1C", SIMPLE_FIXED_1, RI10),  -- Add Word Immediate
-    (x"0C", SIMPLE_FIXED_1, RI10),  -- Subtract from Word Immediate
-    (x"14", SIMPLE_FIXED_1, RI10),  -- AND Word Immediate
-    (x"04", SIMPLE_FIXED_1, RI10),  -- OR Word Immediate
-    (x"7C", SIMPLE_FIXED_1, RI10),  -- Compare Equal Word Immediate
-    (x"4C", SIMPLE_FIXED_1, RI10),  -- Compare Greater Than Word Immediate
-    (x"5C", SIMPLE_FIXED_1, RI10),  -- Compare Logical Greater Than Word Immediate
-    (x"74", SINGE_PRECISION, RI10), -- Multiply Immediate
-    (x"75", SINGE_PRECISION, RI10)  -- Multiply Unsigned Immediate
+    ("---00110100", LOCAL_STORE, RI10, '0'),     -- Load Quadword (d-form),
+    ("---00100100", LOCAL_STORE, RI10, '0'),     -- Store Quadword (d-form)
+    ("---00011100", SIMPLE_FIXED_1, RI10, '0'),  -- Add Word Immediate
+    ("---00001100", SIMPLE_FIXED_1, RI10, '0'),  -- Subtract from Word Immediate
+    ("---00010100", SIMPLE_FIXED_1, RI10, '0'),  -- AND Word Immediate
+    ("---00000100", SIMPLE_FIXED_1, RI10, '0'),  -- OR Word Immediate
+    ("---01111100", SIMPLE_FIXED_1, RI10, '0'),  -- Compare Equal Word Immediate
+    ("---01001100", SIMPLE_FIXED_1, RI10, '0'),  -- Compare Greater Than Word Immediate
+    ("---01011100", SIMPLE_FIXED_1, RI10, '0'),  -- Compare Logical Greater Than Word Immediate
+    ("---01110100", SINGE_PRECISION, RI10, '0'), -- Multiply Immediate
+    ("---01110101", SINGE_PRECISION, RI10, '0')  -- Multiply Unsigned Immediate
 );
 
------ INSTRUCTION STRUCTURE -----
-type INSTR_9 is record
-    OPCODE : STD_LOGIC_VECTOR((OPCODE_WIDTH_9-1) downto 0); -- Instruction Op-code
-    UNIT   : EXE_UNIT; -- Execution Unit Type
-    FORMAT : FORMAT;   -- Instruction Format
-end record INSTR_9;
-
-type ISA_9 is array (0 to (OPCODE_WIDTH_9_COUNT-1)) of INSTR_9; 
+type ISA_9 is array (0 to (OPCODE_WIDTH_9_COUNT-1)) of INSTR_STRUCTURE; 
 constant ISA_TABLE_9 : ISA_9 := (
-    (STD_LOGIC_VECTOR(to_unsigned(16#61#, OPCODE_WIDTH_9)), LOCAL_STORE, RI16), -- Load Quadword (a–form)
-    (STD_LOGIC_VECTOR(to_unsigned(16#41#, OPCODE_WIDTH_9)), LOCAL_STORE, RI16), -- Store Quadword (a-form)
-    (STD_LOGIC_VECTOR(to_unsigned(16#82#, OPCODE_WIDTH_9)), LOCAL_STORE, RI16), -- Immediate Load Half Word Upper
-    (STD_LOGIC_VECTOR(to_unsigned(16#81#, OPCODE_WIDTH_9)), LOCAL_STORE, RI16), -- Immediate Load Word
-    (STD_LOGIC_VECTOR(to_unsigned(16#C1#, OPCODE_WIDTH_9)), LOCAL_STORE, RI16), -- Immediate OR Halfword Lower
-    (STD_LOGIC_VECTOR(to_unsigned(16#64#, OPCODE_WIDTH_9)), BRANCH, RI16),      -- Branch Relative
-    (STD_LOGIC_VECTOR(to_unsigned(16#60#, OPCODE_WIDTH_9)), BRANCH, RI16),      -- Branch Absolute
-    (STD_LOGIC_VECTOR(to_unsigned(16#42#, OPCODE_WIDTH_9)), BRANCH, RI16),      -- Branch If Not Zero Word
-    (STD_LOGIC_VECTOR(to_unsigned(16#40#, OPCODE_WIDTH_9)), BRANCH, RI16)       -- Branch If Zero Word
+    ("--001100001", LOCAL_STORE, RI16, '0'), -- Load Quadword (aï¿½form)
+    ("--001000001", LOCAL_STORE, RI16, '0'), -- Store Quadword (a-form)
+    ("--010000010", LOCAL_STORE, RI16, '0'), -- Immediate Load Half Word Upper
+    ("--010000001", LOCAL_STORE, RI16, '0'), -- Immediate Load Word
+    ("--011000001", LOCAL_STORE, RI16, '0'), -- Immediate OR Halfword Lower
+    ("--001100100", BRANCH, RI16, '0'),      -- Branch Relative
+    ("--001100000", BRANCH, RI16, '0'),      -- Branch Absolute
+    ("--001000010", BRANCH, RI16, '0'),      -- Branch If Not Zero Word
+    ("--001000000", BRANCH, RI16, '0')       -- Branch If Zero Word
 );
-
------ INSTRUCTION STRUCTURE -----
-type INSTR_11 is record
-    OPCODE : STD_LOGIC_VECTOR((OPCODE_WIDTH_11-1) downto 0); -- Instruction Op-code
-    UNIT   : EXE_UNIT; -- Execution Unit Type
-    FORMAT : FORMAT;   -- Instruction Format
-end record INSTR_11;
 
 -- ARRAY OF ALL INSTRUCTIONS IN ISA --
-type ISA_11 is array (0 to (OPCODE_WIDTH_11_COUNT-1)) of INSTR_11; 
+type ISA_11 is array (0 to (OPCODE_WIDTH_11_COUNT-1)) of INSTR_STRUCTURE; 
 constant ISA_TABLE_11 : ISA_11 := (
-    (STD_LOGIC_VECTOR(to_unsigned(16#23#, OPCODE_WIDTH_11)), LOCAL_STORE, RR),      -- Read Instruction Block
-    (STD_LOGIC_VECTOR(to_unsigned(16#C0#, OPCODE_WIDTH_11)), SIMPLE_FIXED_1, RR),   -- Add Word
-    (STD_LOGIC_VECTOR(to_unsigned(16#40#, OPCODE_WIDTH_11)), SIMPLE_FIXED_1, RR),   -- Subtract from Word
-    (STD_LOGIC_VECTOR(to_unsigned(16#2A5#, OPCODE_WIDTH_11)), SIMPLE_FIXED_1, RR),  -- Count Leading Zeros
-    (STD_LOGIC_VECTOR(to_unsigned(16#C1#, OPCODE_WIDTH_11)), SIMPLE_FIXED_1, RR),   -- AND
-    (STD_LOGIC_VECTOR(to_unsigned(16#2C1#, OPCODE_WIDTH_11)), SIMPLE_FIXED_1, RR),  -- AND with Complement
-    (STD_LOGIC_VECTOR(to_unsigned(16#41#, OPCODE_WIDTH_11)), SIMPLE_FIXED_1, RR),   -- OR
-    (STD_LOGIC_VECTOR(to_unsigned(16#2C9#, OPCODE_WIDTH_11)), SIMPLE_FIXED_1, RR),  -- OR with Complement
-    (STD_LOGIC_VECTOR(to_unsigned(16#1F0#, OPCODE_WIDTH_11)), SIMPLE_FIXED_1, RR),  -- OR Across
-    (STD_LOGIC_VECTOR(to_unsigned(16#241#, OPCODE_WIDTH_11)), SIMPLE_FIXED_1, RR),  -- Exclusive OR
-    (STD_LOGIC_VECTOR(to_unsigned(16#C9#, OPCODE_WIDTH_11)), SIMPLE_FIXED_1, RR),   -- NAND
-    (STD_LOGIC_VECTOR(to_unsigned(16#49#, OPCODE_WIDTH_11)), SIMPLE_FIXED_1, RR),   -- NOR
-    (STD_LOGIC_VECTOR(to_unsigned(16#3C0#, OPCODE_WIDTH_11)), SIMPLE_FIXED_1, RR),  -- Compare Equal Word
-    (STD_LOGIC_VECTOR(to_unsigned(16#240#, OPCODE_WIDTH_11)), SIMPLE_FIXED_1, RR),  -- Compare Greater Than Word
-    (STD_LOGIC_VECTOR(to_unsigned(16#2C0#, OPCODE_WIDTH_11)), SIMPLE_FIXED_1, RR),  -- Compare Logical Greater Than Word
-    (STD_LOGIC_VECTOR(to_unsigned(16#3C4#, OPCODE_WIDTH_11)), SINGE_PRECISION, RR), -- Multiply
-    (STD_LOGIC_VECTOR(to_unsigned(16#3CC#, OPCODE_WIDTH_11)), SINGE_PRECISION, RR), -- Multiply Unsigned
-    (STD_LOGIC_VECTOR(to_unsigned(16#3C5#, OPCODE_WIDTH_11)), SINGE_PRECISION, RR), -- Multiply High
-    (STD_LOGIC_VECTOR(to_unsigned(16#3CE#, OPCODE_WIDTH_11)), SINGE_PRECISION, RR), -- Multiply High High Unsigned
-    (STD_LOGIC_VECTOR(to_unsigned(16#2B4#, OPCODE_WIDTH_11)), BYTE, RR),            -- Count Ones in Bytes
-    (STD_LOGIC_VECTOR(to_unsigned(16#D3#, OPCODE_WIDTH_11)), BYTE, RR),             -- Average Bytes
-    (STD_LOGIC_VECTOR(to_unsigned(16#53#, OPCODE_WIDTH_11)), BYTE, RR),             -- Absolute Differences of Bytes
-    (STD_LOGIC_VECTOR(to_unsigned(16#253#, OPCODE_WIDTH_11)), BYTE, RR),            -- Sum Bytes into Halfwords
-    (STD_LOGIC_VECTOR(to_unsigned(16#1A8#, OPCODE_WIDTH_11)), BRANCH, RR),          -- Branch Indirect
-    (STD_LOGIC_VECTOR(to_unsigned(16#128#, OPCODE_WIDTH_11)), BRANCH, RR),          -- Branch Indirect If Zero
-    (STD_LOGIC_VECTOR(to_unsigned(16#2C4#, OPCODE_WIDTH_11)), SINGE_PRECISION, RR), -- Floating Add
-    (STD_LOGIC_VECTOR(to_unsigned(16#2C5#, OPCODE_WIDTH_11)), SINGE_PRECISION, RR), -- Floating Subtract
-    (STD_LOGIC_VECTOR(to_unsigned(16#2C6#, OPCODE_WIDTH_11)), SINGE_PRECISION, RR), -- Floating Multiply
-    (STD_LOGIC_VECTOR(to_unsigned(16#3C2#, OPCODE_WIDTH_11)), SINGE_PRECISION, RR), -- Floating Compare Equal
-    (STD_LOGIC_VECTOR(to_unsigned(16#3CA#, OPCODE_WIDTH_11)), SINGE_PRECISION, RR), -- Floating Compare Magnitude Equal
-    (STD_LOGIC_VECTOR(to_unsigned(16#2C2#, OPCODE_WIDTH_11)), SINGE_PRECISION, RR), -- Floating Compare Greater Than
-    (STD_LOGIC_VECTOR(to_unsigned(16#2CA#, OPCODE_WIDTH_11)), SINGE_PRECISION, RR), -- Floating Compare Magnitude Greater Than
-    (STD_LOGIC_VECTOR(to_unsigned(16#0#, OPCODE_WIDTH_11)), CONTROL, RR),           -- Stop and Signal
-    (STD_LOGIC_VECTOR(to_unsigned(16#1#, OPCODE_WIDTH_11)), CONTROL, RR),           -- Nop (Load)
-    (STD_LOGIC_VECTOR(to_unsigned(16#201#, OPCODE_WIDTH_11)), CONTROL, RR),         -- Nop (Execute)
-    (STD_LOGIC_VECTOR(to_unsigned(16#1FB#, OPCODE_WIDTH_11)), PERMUTE, RI7),        -- Shift Left Quadword by Bits Immediate
-    (STD_LOGIC_VECTOR(to_unsigned(16#1FF#, OPCODE_WIDTH_11)), PERMUTE, RI7),        -- Shift Left Quadword by Bytes Immediate
-    (STD_LOGIC_VECTOR(to_unsigned(16#1FC#, OPCODE_WIDTH_11)), PERMUTE, RI7),        -- Rotate Quadword by Bytes Immediate
-    (STD_LOGIC_VECTOR(to_unsigned(16#1F8#, OPCODE_WIDTH_11)), PERMUTE, RI7),        -- Rotate Quadword by Bits Immediate
-    (STD_LOGIC_VECTOR(to_unsigned(16#7B#, OPCODE_WIDTH_11)), SIMPLE_FIXED_2, RI7),  -- Shift Left Word Immediate
-    (STD_LOGIC_VECTOR(to_unsigned(16#7C#, OPCODE_WIDTH_11)), SIMPLE_FIXED_2, RI7),  -- Rotate Halfword Immediate
-    (STD_LOGIC_VECTOR(to_unsigned(16#78#, OPCODE_WIDTH_11)), SIMPLE_FIXED_2, RI7),  -- Rotate Word Immediate
-    (STD_LOGIC_VECTOR(to_unsigned(16#129#, OPCODE_WIDTH_11)), BRANCH, RI7)          -- Branch Indirect If Not Zero
+    ("00000100011", LOCAL_STORE, RR, '0'),     -- Read Instruction Block
+    ("00011000000", SIMPLE_FIXED_1, RR, '0'),  -- Add Word
+    ("00001000000", SIMPLE_FIXED_1, RR, '0'),  -- Subtract from Word
+    ("01010100101", SIMPLE_FIXED_1, RR, '0'),  -- Count Leading Zeros
+    ("00011000001", SIMPLE_FIXED_1, RR, '0'),  -- AND
+    ("01011000001", SIMPLE_FIXED_1, RR, '0'),  -- AND with Complement
+    ("00001000001", SIMPLE_FIXED_1, RR, '0'),  -- OR
+    ("01011001001", SIMPLE_FIXED_1, RR, '0'),  -- OR with Complement
+    ("00111110000", SIMPLE_FIXED_1, RR, '0'),  -- OR Across
+    ("01001000001", SIMPLE_FIXED_1, RR, '0'),  -- Exclusive OR
+    ("00011001001", SIMPLE_FIXED_1, RR, '0'),  -- NAND
+    ("00001001001", SIMPLE_FIXED_1, RR, '0'),  -- NOR
+    ("01111000000", SIMPLE_FIXED_1, RR, '0'),  -- Compare Equal Word
+    ("01001000000", SIMPLE_FIXED_1, RR, '0'),  -- Compare Greater Than Word
+    ("01011000000", SIMPLE_FIXED_1, RR, '0'),  -- Compare Logical Greater Than Word
+    ("01111000100", SINGE_PRECISION, RR, '0'), -- Multiply
+    ("01111001100", SINGE_PRECISION, RR, '0'), -- Multiply Unsigned
+    ("01111000101", SINGE_PRECISION, RR, '0'), -- Multiply High
+    ("01111001110", SINGE_PRECISION, RR, '0'), -- Multiply High High Unsigned
+    ("01010110100", BYTE, RR, '0'),            -- Count Ones in Bytes
+    ("00011010011", BYTE, RR, '0'),            -- Average Bytes
+    ("00001010011", BYTE, RR, '0'),            -- Absolute Differences of Bytes
+    ("01001010011", BYTE, RR, '0'),            -- Sum Bytes into Halfwords
+    ("00110101000", BRANCH, RR, '0'),          -- Branch Indirect
+    ("00100101000", BRANCH, RR, '0'),          -- Branch Indirect If Zero
+    ("01011000100", SINGE_PRECISION, RR, '0'), -- Floating Add
+    ("01011000101", SINGE_PRECISION, RR, '0'), -- Floating Subtract
+    ("01011000110", SINGE_PRECISION, RR, '0'), -- Floating Multiply
+    ("01111000010", SINGE_PRECISION, RR, '0'), -- Floating Compare Equal
+    ("01111001010", SINGE_PRECISION, RR, '0'), -- Floating Compare Magnitude Equal
+    ("01011000010", SINGE_PRECISION, RR, '0'), -- Floating Compare Greater Than
+    ("01011001010", SINGE_PRECISION, RR, '0'), -- Floating Compare Magnitude Greater Than
+    ("00000000000", HALT, RR, '1'),            -- Stop and Signal (Handled in Instruction Fetch Stage)
+    ("00000000001", SIMPLE_FIXED_1, RR, '0'),  -- Nop (Load)
+    ("01000000001", PERMUTE, RR, '0'),         -- Nop (Execute)
+    ("00111111011", PERMUTE, RI7, '0'),        -- Shift Left Quadword by Bits Immediate
+    ("00111111111", PERMUTE, RI7, '0'),        -- Shift Left Quadword by Bytes Immediate
+    ("00111111100", PERMUTE, RI7, '0'),        -- Rotate Quadword by Bytes Immediate
+    ("00111111000", PERMUTE, RI7, '0'),        -- Rotate Quadword by Bits Immediate
+    ("00001111011", SIMPLE_FIXED_2, RI7, '0'), -- Shift Left Word Immediate
+    ("00001111100", SIMPLE_FIXED_2, RI7, '0'), -- Rotate Halfword Immediate
+    ("00001111000", SIMPLE_FIXED_2, RI7, '0'), -- Rotate Word Immediate
+    ("00100101001", BRANCH, RI7, '0')          -- Branch Indirect If Not Zero
 );
+    ----- Searches for the passsed in instructions and returns the assocaited ISA structure pair -----
+    function instr_search(
+        INSTR : STD_LOGIC_VECTOR((INSTR_PAIR_SIZE-1) downto 0)) -- Instruction to search for
+    return INSTR_PAIR_STRUCTURE;
+       
+    ----- Gets the data required by the Instruction format -----
+    function get_instr_data(
+        INSTR        : STD_LOGIC_VECTOR((INSTR_SIZE-1) downto 0);
+        INSTR_STRUCT : INSTR_STRUCTURE)
+    return INSTR_DATA;
 end package SPU_CORE_ISA_PACKAGE;
+
+package body SPU_CORE_ISA_PACKAGE is
+    ----- Checks the Forwarding Circuits for Dependencies -----
+    function instr_search(INSTR : in STD_LOGIC_VECTOR((INSTR_PAIR_SIZE-1) downto 0)) -- Instruction to search for
+                          return INSTR_PAIR_STRUCTURE is
+        variable INSTR_PAIR_OUT : INSTR_PAIR_STRUCTURE; 
+        variable INSTR_S_1      : INSTR_STRUCTURE;
+        variable INSTR_S_2      : INSTR_STRUCTURE;
+        variable OPCODE_1       : STD_LOGIC_VECTOR((OPCODE_WIDTH-1) downto 0) := (others => '0');
+        variable OPCODE_2       : STD_LOGIC_VECTOR((OPCODE_WIDTH-1) downto 0) := (others => '0');
+    begin
+        -- Initialize Instruction Pair Struct --
+        INSTR_PAIR_OUT.EVEN_INSTR    := (others => '0');
+        INSTR_PAIR_OUT.ODD_INSTR     := (others => '0');
+        INSTR_PAIR_OUT.STRUCT_HAZARD := '0';
+        INSTR_PAIR_OUT.HAZARD_E_O    := '0';
+        
+        ----- Check 4-bit Size Opcodes -----
+        OPCODE_1 := "-------" & INSTR((INSTR_SIZE-1) downto 28);
+        OPCODE_2 := "-------" & INSTR((INSTR_PAIR_SIZE-1) downto 60);
+        for i in 0 to (OPCODE_WIDTH_4_COUNT-1) loop  
+            if(ISA_TABLE_4(i).OPCODE = OPCODE_1) then
+                INSTR_S_1 := ISA_TABLE_4(i);
+            end if;
+            if(ISA_TABLE_4(i).OPCODE = OPCODE_2) then
+                INSTR_S_2 := ISA_TABLE_4(i);
+            end if;
+        end loop;
+        
+        ----- Check 7-bit Size Opcodes -----
+        OPCODE_1 := "----" & INSTR((INSTR_SIZE-1) downto 25);
+        OPCODE_2 := "----" & INSTR((INSTR_PAIR_SIZE-1) downto 57);
+        if(ISA_TABLE_7.OPCODE = OPCODE_1) then
+            INSTR_S_1 := ISA_TABLE_7;
+        end if;
+        if(ISA_TABLE_7.OPCODE = OPCODE_2) then
+            INSTR_S_2 := ISA_TABLE_7;
+        end if;
+        
+        ----- Check 8-bit Size Opcodes -----
+        OPCODE_1 := "---" & INSTR((INSTR_SIZE-1) downto 24);
+        OPCODE_2 := "---" & INSTR((INSTR_PAIR_SIZE-1) downto 56);
+        for i in 0 to (OPCODE_WIDTH_8_COUNT-1) loop  
+            if(ISA_TABLE_8(i).OPCODE = OPCODE_1) then
+                INSTR_S_1 := ISA_TABLE_8(i);
+            end if;
+            if(ISA_TABLE_8(i).OPCODE = OPCODE_2) then
+                INSTR_S_2 := ISA_TABLE_8(i);
+            end if;
+        end loop;
+        
+        ----- Check 9-bit Size Opcodes -----
+        OPCODE_1 := "--" & INSTR((INSTR_SIZE-1) downto 23);
+        OPCODE_2 := "--" & INSTR((INSTR_PAIR_SIZE-1) downto 55);
+        for i in 0 to (OPCODE_WIDTH_9_COUNT-1) loop  
+            if(ISA_TABLE_9(i).OPCODE = OPCODE_1) then
+                INSTR_S_1 := ISA_TABLE_9(i);
+            end if;
+            if(ISA_TABLE_9(i).OPCODE = OPCODE_2) then
+                INSTR_S_2 := ISA_TABLE_9(i);
+            end if;
+        end loop;
+        
+        ----- Check 11-bit Size Opcodes -----
+        OPCODE_1 := INSTR((INSTR_SIZE-1) downto 21);
+        OPCODE_2 := INSTR((INSTR_PAIR_SIZE-1) downto 53);
+        for i in 0 to (OPCODE_WIDTH_11_COUNT-1) loop  
+            if(ISA_TABLE_11(i).OPCODE = OPCODE_1) then
+                INSTR_S_1 := ISA_TABLE_11(i);
+            end if;
+            if(ISA_TABLE_11(i).OPCODE = OPCODE_2) then
+                INSTR_S_2 := ISA_TABLE_11(i);
+            end if;
+        end loop;
+        
+        ----- HANDLE PIPE ASSINGMENTS, STRUCTURAL HAZARD, & STOP -----
+        if(INSTR_S_2.HALT = '1') then
+            INSTR_PAIR_OUT.ODD_S := INSTR_S_2;
+            INSTR_PAIR_OUT.ODD_INSTR := INSTR((INSTR_PAIR_SIZE-1) downto 32);
+            INSTR_PAIR_OUT.EVEN_S := INSTR_S_1;
+            INSTR_PAIR_OUT.EVEN_INSTR := INSTR((INSTR_SIZE-1) downto 0);
+        elsif((INSTR_S_1.UNIT = SIMPLE_FIXED_1 OR 
+            INSTR_S_1.UNIT = SIMPLE_FIXED_2    OR
+            INSTR_S_1.UNIT = SINGE_PRECISION   OR
+            INSTR_S_1.UNIT = BYTE)             AND 
+           (INSTR_S_2.UNIT = PERMUTE           OR
+            INSTR_S_2.UNIT = LOCAL_STORE       OR
+            INSTR_S_2.UNIT = BRANCH)) then
+               -- Even Pipe Instruction --
+               INSTR_PAIR_OUT.EVEN_S := INSTR_S_1;
+               INSTR_PAIR_OUT.EVEN_INSTR := INSTR((INSTR_SIZE-1) downto 0);
+               -- Odd Pipe Instruction --
+               INSTR_PAIR_OUT.ODD_S := INSTR_S_2;
+               INSTR_PAIR_OUT.ODD_INSTR := INSTR((INSTR_PAIR_SIZE-1) downto 32);
+        elsif((INSTR_S_2.UNIT = SIMPLE_FIXED_1  OR 
+               INSTR_S_2.UNIT = SIMPLE_FIXED_2  OR
+               INSTR_S_2.UNIT = SINGE_PRECISION OR
+               INSTR_S_2.UNIT = BYTE)           AND 
+              (INSTR_S_1.UNIT = PERMUTE         OR
+               INSTR_S_1.UNIT = LOCAL_STORE     OR
+               INSTR_S_1.UNIT = BRANCH)) then
+                  -- Even Pipe Instruction --
+                  INSTR_PAIR_OUT.EVEN_S := INSTR_S_2;
+                  INSTR_PAIR_OUT.EVEN_INSTR := INSTR((INSTR_PAIR_SIZE-1) downto 32);
+                  -- Odd Pipe Instruction --
+                  INSTR_PAIR_OUT.ODD_S := INSTR_S_1;
+                  INSTR_PAIR_OUT.ODD_INSTR := INSTR((INSTR_SIZE-1) downto 0);
+        elsif((INSTR_S_1.UNIT = SIMPLE_FIXED_1  OR 
+               INSTR_S_1.UNIT = SIMPLE_FIXED_2  OR
+               INSTR_S_1.UNIT = SINGE_PRECISION OR
+               INSTR_S_1.UNIT = BYTE)           AND 
+              (INSTR_S_2.UNIT = SIMPLE_FIXED_1  OR
+               INSTR_S_2.UNIT = SIMPLE_FIXED_2  OR
+               INSTR_S_2.UNIT = SINGE_PRECISION OR 
+               INSTR_S_2.UNIT = BYTE)) then
+                   ----- Both Instr going to Even Pipe -----
+                   INSTR_PAIR_OUT.STRUCT_HAZARD := '1';
+                   INSTR_PAIR_OUT.HAZARD_E_O := '0';
+                   INSTR_PAIR_OUT.EVEN_S := INSTR_S_1;
+                   INSTR_PAIR_OUT.EVEN_INSTR := INSTR((INSTR_SIZE-1) downto 0);
+                   INSTR_PAIR_OUT.ODD_S := INSTR_S_2;
+                   INSTR_PAIR_OUT.ODD_INSTR := INSTR((INSTR_PAIR_SIZE-1) downto 32);
+        elsif((INSTR_S_1.UNIT = PERMUTE     OR 
+               INSTR_S_1.UNIT = LOCAL_STORE OR
+               INSTR_S_1.UNIT = BRANCH)     AND 
+              (INSTR_S_2.UNIT = PERMUTE     OR
+               INSTR_S_2.UNIT = LOCAL_STORE OR
+               INSTR_S_2.UNIT = BRANCH)) then
+                   ----- Both Instr going to Odd Pipe -----
+                   INSTR_PAIR_OUT.STRUCT_HAZARD := '1';
+                   INSTR_PAIR_OUT.HAZARD_E_O := '1';
+                   INSTR_PAIR_OUT.EVEN_S := INSTR_S_2;
+                   INSTR_PAIR_OUT.EVEN_INSTR := INSTR((INSTR_PAIR_SIZE-1) downto 32);
+                   INSTR_PAIR_OUT.ODD_S := INSTR_S_1;
+                   INSTR_PAIR_OUT.ODD_INSTR := INSTR((INSTR_SIZE-1) downto 0);
+        end if;
+        
+        return INSTR_PAIR_OUT;
+    end function instr_search;
+       
+    ----- Get the data required by the Instruction format -----
+    function get_instr_data(INSTR : STD_LOGIC_VECTOR((INSTR_SIZE-1) downto 0);
+                            INSTR_STRUCT : INSTR_STRUCTURE)
+                            return INSTR_DATA is
+        variable DATA : INSTR_DATA;
+    begin
+        case(INSTR_STRUCT.FORMAT) is
+            when RR   =>
+                DATA.OP_CODE  := INSTR_STRUCT.OPCODE;
+                DATA.UNIT     := INSTR_STRUCT.UNIT;
+                DATA.RA_ADDR  := INSTR(13 downto 7);
+                DATA.RB_ADDR  := INSTR(20 downto 14);
+                DATA.RC_ADDR  := (others => '0');
+                DATA.RI7      := (others => '0');
+                DATA.RI10     := (others => '0');
+                DATA.RI16     := (others => '0');
+                DATA.RI18     := (others => '0');
+                DATA.REG_DEST := INSTR(6 downto 0);
+            when RRR  =>
+                DATA.OP_CODE  := INSTR_STRUCT.OPCODE;
+                DATA.UNIT     := INSTR_STRUCT.UNIT;
+                DATA.RA_ADDR  := INSTR(13 downto 7);
+                DATA.RB_ADDR  := INSTR(20 downto 14);
+                DATA.RC_ADDR  := INSTR(6 downto 0);
+                DATA.RI7      := (others => '0');
+                DATA.RI10     := (others => '0');
+                DATA.RI16     := (others => '0');
+                DATA.RI18     := (others => '0');
+                DATA.REG_DEST := INSTR(27 downto 21);
+            when RI7  =>
+                DATA.OP_CODE  := INSTR_STRUCT.OPCODE;
+                DATA.UNIT     := INSTR_STRUCT.UNIT;
+                DATA.RA_ADDR  := INSTR(13 downto 7);
+                DATA.RB_ADDR  := (others => '0');
+                DATA.RC_ADDR  := (others => '0');
+                DATA.RI7      := INSTR(20 downto 14);
+                DATA.RI10     := (others => '0');
+                DATA.RI16     := (others => '0');
+                DATA.RI18     := (others => '0');
+                DATA.REG_DEST := INSTR(6 downto 0);
+            when RI10 => 
+                DATA.OP_CODE  := INSTR_STRUCT.OPCODE;
+                DATA.UNIT     := INSTR_STRUCT.UNIT;
+                DATA.RA_ADDR  := INSTR(13 downto 7);
+                DATA.RB_ADDR  := (others => '0');
+                DATA.RC_ADDR  := (others => '0');
+                DATA.RI7      := (others => '0');
+                DATA.RI10     := INSTR(23 downto 14);
+                DATA.RI16     := (others => '0');
+                DATA.RI18     := (others => '0');
+                DATA.REG_DEST := INSTR(6 downto 0);
+            when RI16 =>
+                DATA.OP_CODE  := INSTR_STRUCT.OPCODE;
+                DATA.UNIT     := INSTR_STRUCT.UNIT;
+                DATA.RA_ADDR  := (others => '0');
+                DATA.RB_ADDR  := (others => '0');
+                DATA.RC_ADDR  := (others => '0');
+                DATA.RI7      := (others => '0');
+                DATA.RI10     := (others => '0');
+                DATA.RI16     := INSTR(22 downto 7);
+                DATA.RI18     := (others => '0');
+                DATA.REG_DEST := INSTR(6 downto 0);
+            when RI18 =>
+                DATA.OP_CODE  := INSTR_STRUCT.OPCODE;
+                DATA.UNIT     := INSTR_STRUCT.UNIT;
+                DATA.RA_ADDR  := (others => '0');
+                DATA.RB_ADDR  := (others => '0');
+                DATA.RC_ADDR  := (others => '0');
+                DATA.RI7      := (others => '0');
+                DATA.RI10     := (others => '0');
+                DATA.RI16     := (others => '0');
+                DATA.RI18     := INSTR(24 downto 7);
+                DATA.REG_DEST := INSTR(6 downto 0);
+        end case;
+        
+        DATA.INSTR := INSTR;
+        
+        return DATA;
+    end function get_instr_data;
+end package body SPU_CORE_ISA_PACKAGE;

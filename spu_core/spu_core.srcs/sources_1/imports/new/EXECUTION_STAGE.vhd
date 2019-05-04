@@ -10,6 +10,7 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use work.COMPONENTS_PACKAGE.ALL; 
+use work.CONSTANTS_PACKAGE.ALL;
 
 -------------------- ENTITY DEFINITION --------------------
 entity EXECUTION_STAGE is
@@ -41,6 +42,8 @@ port (
     ODD_REG_DEST_EXE  : in STD_LOGIC_VECTOR((ADDR_WIDTH-1) downto 0);
     LS_DATA_IN        : in STD_LOGIC_VECTOR((DATA_WIDTH-1) downto 0); 
     -------------------- OUTPUTS --------------------
+    PC_BRNCH                  : out STD_LOGIC_VECTOR((LS_INSTR_SECTION_SIZE - 1) downto 0); -- Next value of the PC when branching
+    BRANCH_FLUSH              : out STD_LOGIC;
     RESULT_PACKET_EVEN_OUT_FC : out RESULT_PACKET_EVEN := ((others => '0'), (others => '0'), '0', 0);
     RESULT_PACKET_ODD_OUT_FC  : out RESULT_PACKET_ODD  := ((others => '0'), (others => '0'), '0', 0);
     LS_WE_OUT_EOP             : out STD_LOGIC := '0';
@@ -148,6 +151,8 @@ begin
         ODD_OPCODE_EOP       => ODD_OPCODE_OUT_FM,
         LOCAL_STORE_DATA_EOP => LS_DATA_IN,
         -------------------- OUTPUTS --------------------
+        PC_BRNCH                   => PC_BRNCH,
+        BRANCH_FLUSH               => BRANCH_FLUSH,
         LS_WE_OUT_EOP              => LS_WE_OUT_EOP,
         LS_RIB_OUT_EOP             => LS_RIB_OUT_EOP,
         LS_DATA_OUT_EOP            => LS_DATA_OUT_EOP,

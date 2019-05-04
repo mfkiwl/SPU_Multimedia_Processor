@@ -75,37 +75,26 @@ begin
     -------------------- INSTANTIATE EVEN & ODD PIPE --------------------
     eop : even_odd_pipes port map (
         CLK       => CLK,
-        EVEN_RI7  => EVEN_RI7,
-        EVEN_RI10 => EVEN_RI10,
-        EVEN_RI16 => EVEN_RI16,
-        ODD_RI7   => ODD_RI7,
-        ODD_RI10  => ODD_RI10,
-        ODD_RI16  => ODD_RI16,
-        ODD_RI18  => ODD_RI18,
-        EVEN_REG_DEST => EVEN_REG_DEST, 
-        ODD_REG_DEST  => ODD_REG_DEST, 
-        RA_EVEN_DATA  => RA_EVEN_DATA, 
-        RB_EVEN_DATA  => RB_EVEN_DATA,
-        RC_EVEN_DATA  => RC_EVEN_DATA,    
-        RA_ODD_DATA   => RA_ODD_DATA, 
-        RB_ODD_DATA   => RB_ODD_DATA, 
-        RC_ODD_DATA   => RC_ODD_DATA,
-        EVEN_OPCODE   => EVEN_OPCODE,
-        ODD_OPCODE    => ODD_OPCODE,
-        LOCAL_STORE_DATA   => DATA_OUT,
-        LOCAL_STORE_ADDR   => LOCAL_STORE_ADDR,
-        RESULT_PACKET_EVEN_OUT => RESULT_PACKET_EVEN_OUT,  
-        RESULT_PACKET_ODD_OUT  => RESULT_PACKET_ODD_OUT
-    );
-    
-    -------------------- INSTANTIATE LOCAL STORE --------------------
-    ls : local_store port map (
-        WE   => WE,
-        RIB  => RIB,
-        ADDR => LOCAL_STORE_ADDR,
-        DATA_IN  => DATA_IN,
-        DATA_OUT => DATA_OUT,
-        INSTR_BLOCK_OUT => INSTR_BLOCK_OUT
+        EVEN_RI7_EOP  => EVEN_RI7,
+        EVEN_RI10_EOP => EVEN_RI10,
+        EVEN_RI16_EOP => EVEN_RI16,
+        EVEN_REG_DEST_EOP => EVEN_REG_DEST, 
+        ODD_RI7_EOP   => ODD_RI7,
+        ODD_RI10_EOP  => ODD_RI10,
+        ODD_RI16_EOP  => ODD_RI16,
+        ODD_RI18_EOP  => ODD_RI18,
+        ODD_REG_DEST_EOP  => ODD_REG_DEST, 
+        RA_EVEN_DATA_EOP  => RA_EVEN_DATA, 
+        RB_EVEN_DATA_EOP  => RB_EVEN_DATA,
+        RC_EVEN_DATA_EOP  => RC_EVEN_DATA,    
+        RA_ODD_DATA_EOP   => RA_ODD_DATA, 
+        RB_ODD_DATA_EOP   => RB_ODD_DATA, 
+        RC_ODD_DATA_EOP   => RC_ODD_DATA,
+        EVEN_OPCODE_EOP   => EVEN_OPCODE,
+        ODD_OPCODE_EOP    => ODD_OPCODE,
+        LOCAL_STORE_DATA_EOP   => DATA_OUT,
+        RESULT_PACKET_EVEN_OUT_EOP => RESULT_PACKET_EVEN_OUT,  
+        RESULT_PACKET_ODD_OUT_EOP  => RESULT_PACKET_ODD_OUT
     );
     
     -------------------- CLK GENERATION PROCESS --------------------
@@ -115,13 +104,9 @@ begin
     SIMULUS_PROC : process
     begin         
         ----- Test the Add Word Instruction  -----
-        ODD_RI16 <= STD_LOGIC_VECTOR(to_unsigned(1024, RI16_WIDTH));
-        EVEN_REG_DEST <= STD_LOGIC_VECTOR(to_unsigned(12, ADDR_WIDTH));
-        ODD_REG_DEST <= STD_LOGIC_VECTOR(to_unsigned(13, ADDR_WIDTH));
-        RA_EVEN_DATA <= x"0000_BEEF_0000_DEED_0000_CAFE_0000_C0DE";
-        RB_EVEN_DATA <=  x"0000_C0FF_0000_DAFA_0000_EDBA_0000_EDAD";
-        EVEN_OPCODE <= STD_LOGIC_VECTOR(to_unsigned(192, OPCODE_WIDTH)); -- Add Word
-        ODD_OPCODE <= STD_LOGIC_VECTOR(to_unsigned(97, OPCODE_WIDTH)); -- Load Quadword (a-form)
+        EVEN_OPCODE <= "-------" & "1100";
+        
+        ODD_OPCODE <= "01000000001";
         
         wait;
     end process;
