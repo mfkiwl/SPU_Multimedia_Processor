@@ -152,7 +152,7 @@ assembler_test() {
                 code -n "$rsrcdir/0_assembler_test.asm" "$outdir\data" &>/dev/null & 
                 ;;
             2)  # CACHE MISS TEST #
-                code -n "$rsrcdir/2_cache_miss_test.asm" "$outdir\data" &>/dev/null & 
+                code -n "$outdir\data" &>/dev/null & 
                 ;; 
             3)  # DUAL INSTRUCTION TEST #
                 code -n "$rsrcdir/3_NO_HAZARD_dual_fetch-decode-issue-execute_test.asm" "$outdir\data" &>/dev/null & 
@@ -180,13 +180,12 @@ assembler_test() {
     fi
 }
 
+# TCL script Directory #
+scriptdir="C:\Users\Wilmer Suarez\Desktop\SPU_Multimedia_Processor\tests";
+# Simulation Directory #
+simdir="C:\spu_core\spu_core.sim";
 #################### LS FILL TEST - 1 ####################
 ls_fill_test() {
-    # TCL script Directory #
-    scriptdir="C:\Users\Wilmer Suarez\Desktop\SPU_Multimedia_Processor\tests";
-    # Simulation Directory #
-    simdir="C:\spu_core\spu_core.sim";
-
     # ASSEMBLE TEST MACHINE CODE #
     rm "$outdir\data" &>/dev/null & # Remove old data (if any)
     assembler_test 1 1
@@ -213,8 +212,16 @@ cache_miss_test() {
 
     printf "Running ${mag}cache_miss_test${end}...\n";
 
+    # RUN TEST #
+    vivado -mode batch -nolog -nojournal -source "$scriptdir\2_cache_miss_test.tcl" -notrace &>/dev/null &
+    pid=$! # Process ID of test process
+
+    # WAIT FOR TEST PROCESS TO FINISH #
+    spin $pid;
+
     # REMOVE SIMULATION FILES & ASSEMBLER OUTPUT #
     rm -rf $simdir &>/dev/null & 
+    rm "$outdir\data" &>/dev/null &
 }
 
 #################### DUAL INSTRUCTION TEST - 3 ####################
@@ -225,8 +232,16 @@ dual_instruction_test() {
 
     printf "Running ${mag}dual_instruction_test${end}...\n";
 
+    # RUN TEST #
+    vivado -mode batch -nolog -nojournal -source "$scriptdir\3_NO_HAZARD_dual_fetch-decode-issue-execute_test.tcl" -notrace &>/dev/null &
+    pid=$! # Process ID of test process
+
+    # WAIT FOR TEST PROCESS TO FINISH #
+    spin $pid;
+
     # REMOVE SIMULATION FILES & ASSEMBLER OUTPUT #
-    rm -rf $simdir &>/dev/null & 
+    rm -rf $simdir &>/dev/null &
+    rm "$outdir\data" &>/dev/null & 
 }
 
 #################### STRUCTURAL HAZARD RESOLUTION TEST - 4 ####################
@@ -238,7 +253,8 @@ struct_hazard_test() {
     printf "Running ${mag}struct_hazard_test${end}...\n";
 
     # REMOVE SIMULATION FILES & ASSEMBLER OUTPUT #
-    rm -rf $simdir &>/dev/null & 
+    rm -rf $simdir &>/dev/null &
+    rm "$outdir\data" &>/dev/null & 
 }
 
 #################### DATA HAZARD RESOLUTION (NO STALLING) TEST - 5 ####################
@@ -250,7 +266,8 @@ data_hazard_no_stall_test() {
     printf "Running ${mag}data_hazard_no_stall_test${end}...\n";
 
     # REMOVE SIMULATION FILES & ASSEMBLER OUTPUT #
-    rm -rf $simdir &>/dev/null & 
+    rm -rf $simdir &>/dev/null &
+    rm "$outdir\data" &>/dev/null & 
 }
 
 #################### DATA HAZARD RESOLUTION (STALLING) TEST - 6 ####################
@@ -262,7 +279,8 @@ data_hazard_stall_test() {
     printf "Running ${mag}data_hazard_stall_test${end}...\n";
 
     # REMOVE SIMULATION FILES & ASSEMBLER OUTPUT #
-    rm -rf $simdir &>/dev/null & 
+    rm -rf $simdir &>/dev/null &
+    rm "$outdir\data" &>/dev/null & 
 }
 
 #################### CONTROL HAZARD RESOLUTION TEST - 7 ####################
@@ -274,7 +292,8 @@ control_hazard_test() {
     printf "Running ${mag}control_hazard_test${end}...\n";
 
     # REMOVE SIMULATION FILES & ASSEMBLER OUTPUT #
-    rm -rf $simdir &>/dev/null & 
+    rm -rf $simdir &>/dev/null &
+    rm "$outdir\data" &>/dev/null & 
 }
 
 #################### ALL INSTRUCTION TEST - 8 ####################
@@ -287,6 +306,7 @@ all_instruction_test() {
 
     # REMOVE SIMULATION FILES & ASSEMBLER OUTPUT #
     rm -rf $simdir &>/dev/null & 
+    rm "$outdir\data" &>/dev/null &
 }
 
 #################### PROGRESS SPINNER ####################

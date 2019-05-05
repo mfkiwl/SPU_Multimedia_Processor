@@ -20,6 +20,7 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
+use work.SPU_CORE_ISA_PACKAGE.ALL;
 use work.COMPONENTS_PACKAGE.ALL; -- Contains result_packet Record
 use work.CONSTANTS_PACKAGE.ALL;
 
@@ -55,6 +56,10 @@ port (
     RESULT_PACKET_EVEN_FC : in RESULT_PACKET_EVEN; -- Result Packet from Even Execution Units 
     RESULT_PACKET_ODD_FC  : in RESULT_PACKET_ODD;  -- Result Packet from Odd Execution Units
     -------------------- OUTPUTS --------------------
+    INSTR_BLOCK           : out STD_LOGIC_VECTOR((INSTR_WIDTH_LS-1) downto 0) := (others => '0'); -- 128-bytes (32 Instructions) from Local Store
+    WRITE_CACHE           : out STD_LOGIC := '0'; -- Cache write enable
+    PC_BRNCH              : out STD_LOGIC_VECTOR((LS_INSTR_SECTION_SIZE - 1) downto 0) := (others => '0'); -- Next value of the PC when branching
+    BRANCH_FLUSH          : out STD_LOGIC := '0'; -- Flush Flag when Branch mispredict
     RA_EVEN_DATA_OUT_FM   : out STD_LOGIC_VECTOR((DATA_WIDTH-1) downto 0)   := (others => '0'); -- Even Pipe RA Data
     RB_EVEN_DATA_OUT_FM   : out STD_LOGIC_VECTOR((DATA_WIDTH-1) downto 0)   := (others => '0'); -- Even Pipe RB Data
     RC_EVEN_DATA_OUT_FM   : out STD_LOGIC_VECTOR((DATA_WIDTH-1) downto 0)   := (others => '0'); -- Even Pipe RC Data    
@@ -74,16 +79,12 @@ port (
     ODD_REG_DEST_OUT_FM   : out STD_LOGIC_VECTOR((ADDR_WIDTH-1) downto 0)   := (others => '0'); -- Odd Write back Address (RT)
     ----- FORWARDING CIRCUIT OUTPUTS ----- 
     RESULT_PACKET_EVEN_OUT_FC : out RESULT_PACKET_EVEN := ((others => '0'), (others => '0'), '0', 0); -- Even Pipe Result Packet to Write Back Stage 
-    RESULT_PACKET_ODD_OUT_FC  : out RESULT_PACKET_ODD  := ((others => '0'), (others => '0'), '0', 0)  -- Odd Pipe Result Packet to Write Back Stage 
+    RESULT_PACKET_ODD_OUT_FC  : out RESULT_PACKET_ODD  := ((others => '0'), (others => '0'), '0', 0, '0', (others => '0'), (others => '0'), '0')  -- Odd Pipe Result Packet to Write Back Stage 
 );
 end forwarding_macro_circuits;
 
 -------------------- ARCHITECTURE DEFINITION --------------------
 architecture behavioral of forwarding_macro_circuits is
------ Even Pipe Forwarding Circuit -----
-signal EVEN_PIPE_FC : FC_EVEN := (others =>((others => '0'), (others => '0'), '0', 0));
------ Odd Pipe Forwarding Circuit -----
-signal ODD_PIPE_FC : FC_ODD := (others =>((others => '0'), (others => '0'), '0', 0));
 begin
     -------------------- OUTPUT INSTRUCTION DATA --------------------
     EVEN_REG_DEST_OUT_FM <= EVEN_REG_DEST_FM;
@@ -134,6 +135,14 @@ begin
           
             -- Send oldest Odd Result Packet to Write Back Stage --
             RESULT_PACKET_ODD_OUT_FC <= ODD_PIPE_FC(6);
+            
+            ----- Output Potential Branch data (4th Stage) -----
+            PC_BRNCH     <= ODD_PIPE_FC(3).PC_BRANCH;
+            BRANCH_FLUSH <= ODD_PIPE_FC(3).BRANCH_FLUSH;
+            
+            ----- Output Potential Instruction Block data (6th Stage) -----
+            INSTR_BLOCK <= ODD_PIPE_FC(5).INSTR_BLOCK;
+            WRITE_CACHE <= ODD_PIPE_FC(5).WRITE_CACHE;
         end if;
     end process FC_ODD_PROC;
 end behavioral;

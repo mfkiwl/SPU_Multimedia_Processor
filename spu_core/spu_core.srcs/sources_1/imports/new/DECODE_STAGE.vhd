@@ -28,10 +28,10 @@ port (
     STALL_OUT        : out STD_LOGIC := '0'; -- Stall IF stage when there's a structural hazard
     STALL_E_O        : out STD_LOGIC := '0'; -- Stall Even or Odd Instruction
     PC_OUT           : out STD_LOGIC_VECTOR((LS_INSTR_SECTION_SIZE - 1) downto 0) := (others => '0'); -- Current value of the PC
-    INSTR_EVEN_OUT   : out INSTR_DATA := ("00000000001", SIMPLE_FIXED_1, (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'));
-    INSTR_ODD_OUT    : out INSTR_DATA := ("01000000001", PERMUTE, (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'));
-    INSTR_EVEN_STALL : out INSTR_DATA := ("00000000001", SIMPLE_FIXED_1, (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'));
-    INSTR_ODD_STALL  : out INSTR_DATA := ("01000000001", PERMUTE, (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'))
+    INSTR_EVEN_OUT   : out INSTR_DATA := ("00000000001", SIMPLE_FIXED_1, RI16, (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'));
+    INSTR_ODD_OUT    : out INSTR_DATA := ("01000000001", PERMUTE, RI16, (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'));
+    INSTR_EVEN_STALL : out INSTR_DATA := ("00000000001", SIMPLE_FIXED_1, RI16, (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'));
+    INSTR_ODD_STALL  : out INSTR_DATA := ("01000000001", PERMUTE, RI16, (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'))
 );
 end DECODE_STAGE;
 
@@ -45,10 +45,10 @@ begin
     DECODE_PROC : process(CLK)
     variable INSTR_PAIR_S : INSTR_PAIR_STRUCTURE; 
     variable FIRST_RIB    : STD_LOGIC := '1';
-    variable EVEN_INSTR_DATA : INSTR_DATA := ("00000000001", SIMPLE_FIXED_1, (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'));
-    variable ODD_INSTR_DATA  : INSTR_DATA := ("01000000001", PERMUTE, (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'));
-    variable EVEN_STALL : INSTR_DATA := ("00000000001", SIMPLE_FIXED_1, (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'));
-    variable ODD_STALL  : INSTR_DATA := ("01000000001", PERMUTE, (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'));
+    variable EVEN_INSTR_DATA : INSTR_DATA := ("00000000001", SIMPLE_FIXED_1, RI16, (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'));
+    variable ODD_INSTR_DATA  : INSTR_DATA := ("01000000001", PERMUTE, RI16, (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'));
+    variable EVEN_STALL : INSTR_DATA := ("00000000001", SIMPLE_FIXED_1, RI16, (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'));
+    variable ODD_STALL  : INSTR_DATA := ("01000000001", PERMUTE, RI16, (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'));
     variable STOP_PROG  : BOOLEAN := false; -- Stop program 
     begin
         if(rising_edge(CLK)) then
@@ -63,16 +63,16 @@ begin
                 STALL_OUT <= '1';
                 ODD_STALL.INSTR := x"00200000"; -- Reset mux input
                 ----- STOP signal will either be both instructions or only the first one -----
-                ODD_INSTR_DATA  := ("01000000001", PERMUTE, (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'));
+                ODD_INSTR_DATA  := ("01000000001", PERMUTE, RI16, (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'));
                 if(INSTR_PAIR_S.EVEN_S.HALT = '1') then
-                    EVEN_INSTR_DATA := ("00000000001", SIMPLE_FIXED_1, (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'));
+                    EVEN_INSTR_DATA := ("00000000001", SIMPLE_FIXED_1, RI16, (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'));
                 else 
                     ----- If first instruction is not the STOP instruction -----
                     if(INSTR_PAIR_S.EVEN_S.UNIT = PERMUTE     OR 
                        INSTR_PAIR_S.EVEN_S.UNIT = LOCAL_STORE OR
                        INSTR_PAIR_S.EVEN_S.UNIT = BRANCH) then
                         ODD_INSTR_DATA := EVEN_INSTR_DATA;
-                        EVEN_INSTR_DATA := ("00000000001", SIMPLE_FIXED_1, (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'));   
+                        EVEN_INSTR_DATA := ("00000000001", SIMPLE_FIXED_1, RI16, (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'));   
                     end if;
                 end if;
                 STOP_PROG := true;
@@ -81,20 +81,20 @@ begin
                 STALL_OUT <= '0'; -- Reset Structural Hazard stall
                 FIRST_RIB := '1'; -- Reset RIB stall
                 -- NOPs --
-                EVEN_INSTR_DATA := ("00000000001", SIMPLE_FIXED_1, (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'));
-                ODD_INSTR_DATA  := ("01000000001", PERMUTE, (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'));
+                EVEN_INSTR_DATA := ("00000000001", SIMPLE_FIXED_1, RI16, (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'));
+                ODD_INSTR_DATA  := ("01000000001", PERMUTE, RI16, (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'));
             elsif(INSTR_PAIR_S.STRUCT_HAZARD = '1') then -- When both instructions going to same pipe
                 FIRST_RIB := '1'; -- Reset RIB stall
                 if(INSTR_PAIR_S.HAZARD_E_O = '0') then -- Even Pipe Structural Hazard
                     STALL_E_O <= '0'; -- Even pipe stall
                     ODD_STALL := ODD_INSTR_DATA; -- Save original Odd Data
                     -- Update Odd Pipe Data --
-                    ODD_INSTR_DATA := ("01000000001", PERMUTE, (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'));
+                    ODD_INSTR_DATA := ("01000000001", PERMUTE, RI16, (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'));
                 else -- Odd Pipe Structural Hazard
                     STALL_E_O <= '1'; -- Odd pipe stall
                     EVEN_STALL := EVEN_INSTR_DATA; -- Save original Even Data
                     -- Update Even Pipe Data --
-                    EVEN_INSTR_DATA := ("00000000001", SIMPLE_FIXED_1, (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0')); 
+                    EVEN_INSTR_DATA := ("00000000001", SIMPLE_FIXED_1, RI16, (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0')); 
                 end if;
                 STALL_OUT <= '1'; -- Stall IF stage 
             ----- IF RIB INSTRUCTION - Stall until Instruction Cache is Full -----
@@ -106,8 +106,8 @@ begin
             elsif(STALL_IF = '1') then
                 STALL_E_O <= '0'; -- Reset pipe stall
                 STALL_OUT <= '0'; -- Reset Structural Hazard stall
-                EVEN_INSTR_DATA := ("00000000001", SIMPLE_FIXED_1, (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'));
-                ODD_INSTR_DATA  := ("01000000001", PERMUTE, (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'));
+                EVEN_INSTR_DATA := ("00000000001", SIMPLE_FIXED_1, RI16, (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'));
+                ODD_INSTR_DATA  := ("01000000001", PERMUTE, RI16, (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'));
             else 
                 STALL_E_O <= '0'; -- Reset pipe stall
                 STALL_OUT <= '0'; -- Reset Structural Hazard stall
@@ -120,12 +120,12 @@ begin
                         STALL_E_O <= '1'; -- Even pipe stall
                         EVEN_STALL := ODD_INSTR_DATA; -- Save original Odd Data
                         -- Update Odd Pipe Data --
-                        ODD_INSTR_DATA := ("01000000001", PERMUTE, (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'));
+                        ODD_INSTR_DATA := ("01000000001", PERMUTE, RI16, (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'));
                     else 
                         STALL_E_O <= '0'; -- Odd pipe stall
                         ODD_STALL := EVEN_INSTR_DATA; -- Save original Even Data
                         -- Update Even Pipe Data --
-                        EVEN_INSTR_DATA := ("00000000001", SIMPLE_FIXED_1, (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0')); 
+                        EVEN_INSTR_DATA := ("00000000001", SIMPLE_FIXED_1, RI16, (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0'), (others => '0')); 
                     end if;
                 end if;
             end if; 

@@ -10,10 +10,48 @@ package SPU_CORE_ISA_PACKAGE is
 type EXE_UNIT is (SIMPLE_FIXED_1, SIMPLE_FIXED_2, SINGE_PRECISION, BYTE, PERMUTE, LOCAL_STORE, BRANCH, HALT);
 type FORMAT is (RR, RRR, RI7, RI10, RI16, RI18);
 
+----- EVEN EXECUTION UNITS RESULT PACKET -----
+type result_packet_even is record
+    RESULT   : STD_LOGIC_VECTOR((DATA_WIDTH-1) downto 0); -- Current Instruction Execution Unit Result
+    REG_DEST : STD_LOGIC_VECTOR((ADDR_WIDTH-1) downto 0); -- Register File Destination Address
+    RW       : STD_LOGIC; -- Register File Register Write Control Signal
+    LATENCY  : NATURAL;   -- Latency of Current Instruction 
+end record result_packet_even;
+
+----- ODD EXECUTION UNITS RESULT PACKET -----
+type result_packet_odd is record
+    RESULT        : STD_LOGIC_VECTOR((DATA_WIDTH-1) downto 0); -- Current Instruction Execution Unit Result
+    REG_DEST      : STD_LOGIC_VECTOR((ADDR_WIDTH-1) downto 0); -- Register File Destination Address
+    RW            : STD_LOGIC; -- Register File Register Write Control Signal
+    LATENCY       : NATURAL;   -- Latency of Current Instruction 
+    BRANCH_FLUSH  : STD_LOGIC; -- Flush flag
+    INSTR_BLOCK   : STD_LOGIC_VECTOR((INSTR_WIDTH_LS-1) downto 0); -- 32-instruction Block
+    PC_BRANCH     : STD_LOGIC_VECTOR((LS_INSTR_SECTION_SIZE - 1) downto 0); -- PC target
+    WRITE_CACHE   : STD_LOGIC; -- Cache write enable
+end record result_packet_odd;
+
+----- Forwarding Circuit Array Type - Even -----
+type FC_EVEN is array (0 to (FC_DEPTH-1)) of result_packet_even;
+    
+----- Forwarding Circuit Array Type - Odd -----
+type FC_ODD is array (0 to (FC_DEPTH-1)) of result_packet_odd;
+
+----- Even Pipe Forwarding Circuit -----
+signal EVEN_PIPE_FC : FC_EVEN := (others =>((others => '0'), (others => '0'), '0', 0));
+----- Odd Pipe Forwarding Circuit -----
+signal ODD_PIPE_FC : FC_ODD := (others =>((others => '0'), (others => '0'), '0', 0, '0', (others => '0'), (others => '0'), '0'));
+
+----- DEPEPENDENCY CHECK FOR RF -----
+type PREV_DATA is record
+    REG_DEST   : STD_LOGIC_VECTOR((ADDR_WIDTH-1) downto 0); -- Old register destinatino
+    DONT_CHECK : BOOLEAN; -- Dont check the instruction? (NOP? or same one because of stall)
+end record;
+
 ----- INSTRUCTION DATA -----
 type INSTR_DATA is record
     OP_CODE  : STD_LOGIC_VECTOR((OPCODE_WIDTH-1) downto 0); -- Instruction Opcode
     UNIT     : EXE_UNIT; -- Execution Unit Type
+    FORMAT   : FORMAT;   -- Instruction Format
     RA_ADDR  : STD_LOGIC_VECTOR((ADDR_WIDTH-1) downto 0); -- RA Register File Address
     RB_ADDR  : STD_LOGIC_VECTOR((ADDR_WIDTH-1) downto 0); -- RB Register File Address
     RC_ADDR  : STD_LOGIC_VECTOR((ADDR_WIDTH-1) downto 0); -- RC Register File Address
@@ -28,8 +66,8 @@ end record;
 ----- INSTRUCTION STRUCTURE -----
 type INSTR_STRUCTURE is record
     OPCODE : STD_LOGIC_VECTOR((OPCODE_WIDTH-1) downto 0); -- Instruction Op-code
-    UNIT   : EXE_UNIT; -- Execution Unit Type
-    FORMAT : FORMAT;   -- Instruction Format
+    UNIT   : EXE_UNIT;  -- Execution Unit Type
+    FORMAT : FORMAT;    -- Instruction Format
     HALT   : STD_LOGIC; -- Flag for STOP instruction
 end record INSTR_STRUCTURE;
 
@@ -70,7 +108,7 @@ constant ISA_TABLE_8 : ISA_8 := (
 
 type ISA_9 is array (0 to (OPCODE_WIDTH_9_COUNT-1)) of INSTR_STRUCTURE; 
 constant ISA_TABLE_9 : ISA_9 := (
-    ("--001100001", LOCAL_STORE, RI16, '0'), -- Load Quadword (a�form)
+    ("--001100001", LOCAL_STORE, RI16, '0'), -- Load Quadword (a-form)
     ("--001000001", LOCAL_STORE, RI16, '0'), -- Store Quadword (a-form)
     ("--010000010", LOCAL_STORE, RI16, '0'), -- Immediate Load Half Word Upper
     ("--010000001", LOCAL_STORE, RI16, '0'), -- Immediate Load Word
@@ -129,15 +167,34 @@ constant ISA_TABLE_11 : ISA_11 := (
     ("00100101001", BRANCH, RI7, '0')          -- Branch Indirect If Not Zero
 );
     ----- Searches for the passsed in instructions and returns the assocaited ISA structure pair -----
-    function instr_search(
+    function instr_search (
         INSTR : STD_LOGIC_VECTOR((INSTR_PAIR_SIZE-1) downto 0)) -- Instruction to search for
     return INSTR_PAIR_STRUCTURE;
        
     ----- Gets the data required by the Instruction format -----
-    function get_instr_data(
+    function get_instr_data (
         INSTR        : STD_LOGIC_VECTOR((INSTR_SIZE-1) downto 0);
         INSTR_STRUCT : INSTR_STRUCTURE)
     return INSTR_DATA;
+    
+    ----- Checks if given Instruction has dependencies in stages after the dependency stage -----
+    function check_dependencies (
+        INSTR         : INSTR_DATA;
+        OTHER_INSTR   : INSTR_DATA;
+        PREV          : PREV_DATA;
+        PREV_OTHER    : PREV_DATA;
+        PREV_RF       : PREV_DATA;
+        PREV_RF_OTHER : PREV_DATA;
+        EVEN_FC       : FC_EVEN; -- Even Forwarding Circuit
+        ODD_FC        : FC_ODD)  -- Odd Forwarding Circuit
+    return BOOLEAN;
+    
+    ----- Checks Even and Odd Pipes for dependencies -----
+    function check_pipes (
+        REG_ADDR : STD_LOGIC_VECTOR((ADDR_WIDTH-1) downto 0); -- Register Address being compared
+        EVEN_FC  : FC_EVEN; -- Even Forwarding Circuit
+        ODD_FC   : FC_ODD)  -- Odd Forwarding Circuit
+    return BOOLEAN;
 end package SPU_CORE_ISA_PACKAGE;
 
 package body SPU_CORE_ISA_PACKAGE is
@@ -287,8 +344,6 @@ package body SPU_CORE_ISA_PACKAGE is
     begin
         case(INSTR_STRUCT.FORMAT) is
             when RR   =>
-                DATA.OP_CODE  := INSTR_STRUCT.OPCODE;
-                DATA.UNIT     := INSTR_STRUCT.UNIT;
                 DATA.RA_ADDR  := INSTR(13 downto 7);
                 DATA.RB_ADDR  := INSTR(20 downto 14);
                 DATA.RC_ADDR  := (others => '0');
@@ -298,8 +353,6 @@ package body SPU_CORE_ISA_PACKAGE is
                 DATA.RI18     := (others => '0');
                 DATA.REG_DEST := INSTR(6 downto 0);
             when RRR  =>
-                DATA.OP_CODE  := INSTR_STRUCT.OPCODE;
-                DATA.UNIT     := INSTR_STRUCT.UNIT;
                 DATA.RA_ADDR  := INSTR(13 downto 7);
                 DATA.RB_ADDR  := INSTR(20 downto 14);
                 DATA.RC_ADDR  := INSTR(6 downto 0);
@@ -309,8 +362,7 @@ package body SPU_CORE_ISA_PACKAGE is
                 DATA.RI18     := (others => '0');
                 DATA.REG_DEST := INSTR(27 downto 21);
             when RI7  =>
-                DATA.OP_CODE  := INSTR_STRUCT.OPCODE;
-                DATA.UNIT     := INSTR_STRUCT.UNIT;
+                
                 DATA.RA_ADDR  := INSTR(13 downto 7);
                 DATA.RB_ADDR  := (others => '0');
                 DATA.RC_ADDR  := (others => '0');
@@ -320,8 +372,6 @@ package body SPU_CORE_ISA_PACKAGE is
                 DATA.RI18     := (others => '0');
                 DATA.REG_DEST := INSTR(6 downto 0);
             when RI10 => 
-                DATA.OP_CODE  := INSTR_STRUCT.OPCODE;
-                DATA.UNIT     := INSTR_STRUCT.UNIT;
                 DATA.RA_ADDR  := INSTR(13 downto 7);
                 DATA.RB_ADDR  := (others => '0');
                 DATA.RC_ADDR  := (others => '0');
@@ -331,8 +381,6 @@ package body SPU_CORE_ISA_PACKAGE is
                 DATA.RI18     := (others => '0');
                 DATA.REG_DEST := INSTR(6 downto 0);
             when RI16 =>
-                DATA.OP_CODE  := INSTR_STRUCT.OPCODE;
-                DATA.UNIT     := INSTR_STRUCT.UNIT;
                 DATA.RA_ADDR  := (others => '0');
                 DATA.RB_ADDR  := (others => '0');
                 DATA.RC_ADDR  := (others => '0');
@@ -342,8 +390,6 @@ package body SPU_CORE_ISA_PACKAGE is
                 DATA.RI18     := (others => '0');
                 DATA.REG_DEST := INSTR(6 downto 0);
             when RI18 =>
-                DATA.OP_CODE  := INSTR_STRUCT.OPCODE;
-                DATA.UNIT     := INSTR_STRUCT.UNIT;
                 DATA.RA_ADDR  := (others => '0');
                 DATA.RB_ADDR  := (others => '0');
                 DATA.RC_ADDR  := (others => '0');
@@ -354,8 +400,163 @@ package body SPU_CORE_ISA_PACKAGE is
                 DATA.REG_DEST := INSTR(6 downto 0);
         end case;
         
-        DATA.INSTR := INSTR;
+        DATA.OP_CODE := INSTR_STRUCT.OPCODE;
+        DATA.UNIT    := INSTR_STRUCT.UNIT;
+        DATA.FORMAT  := INSTR_STRUCT.FORMAT;
+        DATA.INSTR   := INSTR;
         
         return DATA;
     end function get_instr_data;
+    
+    ----- Checks if given Instruction has dependencies in stages after the dependency stage -----
+    function check_dependencies(INSTR         : INSTR_DATA; -- Instruction being checked
+                                OTHER_INSTR   : INSTR_DATA; -- Instruction from same pair
+                                PREV          : PREV_DATA;
+                                PREV_OTHER    : PREV_DATA;
+                                PREV_RF       : PREV_DATA;
+                                PREV_RF_OTHER : PREV_DATA;
+                                EVEN_FC       : FC_EVEN; -- Even Forwarding Circuit
+                                ODD_FC        : FC_ODD)  -- Odd Forwarding Circuit)
+                                return BOOLEAN is
+        variable DEP  : BOOLEAN; -- Dependency can or cannot be resolved
+        variable SKIP : BOOLEAN;
+    begin
+        DEP  := FALSE;
+        SKIP := FALSE;
+        
+        ----- RI16 and RI18 formats, and instructions with no operands do not have any dependencies ----- 
+        if((INSTR.FORMAT = RI16) OR (INSTR.FORMAT = RI18) OR
+           (INSTR.OP_CODE = "00000100011") OR (INSTR.OP_CODE = "00000000001") OR
+           (INSTR.OP_CODE = "01000000001")) then
+            SKIP := TRUE;
+        else
+            ----- CHECK THE INSTRUCTION PAIR -----
+--            if(OTHER_INSTR.OP_CODE /= "00000000001" AND 
+--               OTHER_INSTR.OP_CODE /= "01000000001" AND 
+--               OTHER_INSTR.OP_CODE /= "01000000001") then
+--                if(INSTR.REG_DEST = OTHER_INSTR.REG_DEST) then
+--                    DEP := TRUE;
+--                end if;
+--            end if;
+            
+            ----- CHECK PREV_EVEN -----
+            if(NOT PREV.DONT_CHECK) then
+                if(INSTR.REG_DEST = PREV.REG_DEST) then
+                    DEP := TRUE;
+                end if;
+            end if;
+            
+            ----- CHECK PREV_ODD -----
+            if(NOT PREV_OTHER.DONT_CHECK) then
+                if(INSTR.REG_DEST = PREV_OTHER.REG_DEST) then
+                    DEP := TRUE;
+                end if;
+            end if;
+            
+            ----- CHECK PREV_EVEN_RF -----
+            if(NOT PREV_RF.DONT_CHECK) then
+                if(INSTR.REG_DEST = PREV_RF.REG_DEST) then
+                    DEP := TRUE;
+                end if;
+            end if;
+            
+            ----- CHECK PREV_ODD_RF -----
+            if(NOT PREV_RF_OTHER.DONT_CHECK) then
+                if(INSTR.REG_DEST = PREV_RF_OTHER.REG_DEST) then
+                    DEP := TRUE;
+                end if;
+            end if;
+        end if;
+        
+        ----- CHECK FOR DEPENDENCIES IN PIPES -----
+        if((NOT DEP) AND (NOT SKIP)) then
+            case(INSTR.FORMAT) is
+                when RR =>
+                    -- Search for RA Dependency --
+                    if(check_pipes(INSTR.RA_ADDR, EVEN_FC, ODD_FC)) then
+                        DEP := TRUE;
+                    end if;
+                    -- Search for RB Dependency --
+                    if(check_pipes(INSTR.RB_ADDR, EVEN_FC, ODD_FC)) then
+                        DEP := TRUE;
+                    end if;
+                when RRR =>
+                    -- Search for RA Dependency --
+                    if(check_pipes(INSTR.RA_ADDR, EVEN_FC, ODD_FC)) then
+                        DEP := TRUE;
+                    end if;
+                    
+                    -- Search for RB Dependency --
+                    if(check_pipes(INSTR.RB_ADDR, EVEN_FC, ODD_FC)) then
+                        DEP := TRUE;
+                    end if;
+                    
+                    -- Search for RC Dependency --
+                    if(check_pipes(INSTR.RC_ADDR, EVEN_FC, ODD_FC)) then
+                        DEP := TRUE;
+                    end if;
+                when RI7 =>
+                    -- Search for RA Dependency --
+                    if(check_pipes(INSTR.RA_ADDR, EVEN_FC, ODD_FC)) then
+                        DEP := TRUE;
+                    end if;
+                when RI10 =>
+                    -- Search for RA Dependency --
+                    if(check_pipes(INSTR.RA_ADDR, EVEN_FC, ODD_FC)) then
+                        DEP := TRUE;
+                    end if;
+                when others =>
+                    -- Do nothing
+            end case; 
+        end if;
+        
+        return DEP;
+    end function check_dependencies;
+    
+    ----- Checks Even and Odd Pipes for dependencies -----
+    function check_pipes (REG_ADDR : STD_LOGIC_VECTOR((ADDR_WIDTH-1) downto 0); -- Register Address being compared
+                          EVEN_FC  : FC_EVEN; -- Even Forwarding Circuit
+                          ODD_FC   : FC_ODD)  -- Odd Forwarding Circuit
+                          return BOOLEAN is
+        variable DEP        : BOOLEAN := FALSE;
+        variable INDEX_EVEN : NATURAL := 0;
+        variable INDEX_ODD  : NATURAL := 0;
+        variable I_FC       : NATURAL := 0;  -- Forwarding Circuit Index of Data
+    begin
+        INDEX_EVEN := 0;
+        INDEX_ODD  := 0;
+        DEP := FALSE;
+        
+        ----- Check Even Pipe -----
+        while(I_FC < (FC_DEPTH-2)) loop  
+            if (EVEN_FC(I_FC).REG_DEST = REG_ADDR) then
+                INDEX_EVEN := I_FC; -- Update Even dependent instruction index
+                exit;
+            end if;
+            I_FC := I_FC + 1;
+        end loop;
+        
+        ----- Check Odd Pipe -----
+        for i in 0 to (FC_DEPTH-2) loop  
+            if (ODD_FC(i).REG_DEST = REG_ADDR) then
+                if (i < I_FC) then
+                    INDEX_ODD := i; -- Update Odd dependent instruction index
+                end if;
+                exit;
+            end if;
+        end loop;
+        
+        ----- Handle Latencies -----
+        if(INDEX_ODD < INDEX_EVEN) then
+            if((ODD_FC(INDEX_ODD).LATENCY - (INDEX_ODD+1)) > 1) then
+                DEP := TRUE;
+            end if;
+        else 
+            if((EVEN_FC(INDEX_EVEN).LATENCY - (INDEX_EVEN+1)) > 1) then
+                DEP := TRUE;
+            end if;
+        end if;
+        
+        return DEP;
+    end function check_pipes;
 end package body SPU_CORE_ISA_PACKAGE;

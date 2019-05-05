@@ -23,7 +23,7 @@ case $1 in
         "$exedir" < "$rsrcdir/0_assembler_test.asm" > "$outdir\data";
         ;;
     2)  # CACHE MISS TEST #
-        "$exedir" < "$rsrcdir/2_cache_miss_test.asm" > "$outdir\data";
+        "$exedir" < "$rsrcdir/0_assembler_test.asm" > "$outdir\data";
         ;; 
     3)  # DUAL INSTRUCTION TEST #
         "$exedir" < "$rsrcdir/3_NO_HAZARD_dual_fetch-decode-issue-execute_test.asm" > "$outdir\data";

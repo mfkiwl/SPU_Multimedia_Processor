@@ -1,7 +1,6 @@
 #############################################################
-# This script tests the machine code output by the assembler.
-# Demonstrates the Local Store is being filled with the 
-# test instrucints.
+# This test shows the Instruction cache getting filled
+# on a Cache miss.
 #############################################################
 
 #################### OPEN PROJECT ####################
@@ -9,20 +8,19 @@ open_project C:/spu_core/spu_core.xpr -quiet
 
 #################### RUN SIMULATION ####################
 # Change Simulation Top Module #
-set_property top ls_fill_test_TB [get_filesets sim_1] -quiet
+set_property top SPU_CORE_TOP_MODULE_TB [get_filesets sim_1] -quiet
 set_property top_lib xil_defaultlib [get_filesets sim_1] -quiet
 # Launch Simulation #
 launch_simulation -quiet
 # Remove Non Relevant Signals #
-remove_wave { {WE_LS} {RIB_LS} {FILL} {ADDR_LS} {DATA_IN_LS} {PC_LS} {DATA_OUT_LS} {INSTR_BLOCK_OUT_LS} {CLK_PERIOD} }
-# Allow for Local Store bit size #
-set_property display_limit 262144 [current_wave_config] -quiet
+remove_wave { {FILL} {DATA_OUT_LS} {INSTR_BLOCK_OUT_LS} {RESULT_PACKET_EVEN_OUT} {LS_PC_OUT_EXE} {LS_WE_OUT_EOP} {LS_DATA_OUT_EOP} {LS_ADDR_OUT_EOP} {CLK_PERIOD} }
 # Add Local Store SRAM to Wave Viewer #
-add_wave_divider LOCAL_STORE -color magenta -quiet
-add_wave {{/ls_fill_test_TB/ls/SRAM}} -color magenta -quiet
+add_wave_divider CACHE -color magenta -quiet
+add_wave {{/SPU_CORE_TOP_MODULE_TB/UUT/IF_STAGE/ic/CACHE}} -color magenta -quiet
+add_wave {{/SPU_CORE_TOP_MODULE_TB/UUT/IF_STAGE/ic/HIT}}
 # Restart Simulation #
 restart -quiet
-run 2000 ns -quiet
+run 130 ns -quiet
 
 #################### VIEW LOCAL STORE WAVEFORM ####################
 start_gui

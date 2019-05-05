@@ -8,16 +8,16 @@ package CONSTANTS_PACKAGE is
     constant RI10_WIDTH      : NATURAL := 10;   -- Immediate 10-bit format
     constant RI16_WIDTH      : NATURAL := 16;   -- Immediate 16-bit format
     constant RI18_WIDTH      : NATURAL := 18;   -- Immediate 18-bit format
-    constant ADDR_WIDTH_LS   : NATURAL := 4;    -- Bit-width of the SRAM Addresses - Local Store
+    constant ADDR_WIDTH_LS   : NATURAL := 13;   -- Bit-width of the SRAM Addresses - Local Store
     constant INSTR_WIDTH_LS  : NATURAL := 1024; -- Bit-width of Instruction Block - Local Store
-    constant STORAGE_SIZE    : NATURAL := 2048; -- Block Amount
+    constant STORAGE_SIZE    : NATURAL := 8192; -- Block Amount
     constant FC_DEPTH        : NATURAL := 7+1;  -- Number of Forwarding Circuit Stages 7 + WB Stage
     constant INSTR_PAIR_SIZE : NATURAL := 64;   -- Size of instrucion pair from instruction cache
-    constant CACHE_TAG_SIZE  : NATURAL := 3;    -- Size of the cache entry TAGS
+    constant CACHE_TAG_SIZE  : NATURAL := 4;    -- Size of the cache entry TAGS
     constant CACHE_HEIGHT    : NATURAL := 16;   -- Number of entries in instruction cache
     constant CACHE_SIZE      : NATURAL := 16*8; -- 16 Cache entries & 8 byte blocks
     constant INSTR_SIZE      : NATURAL := 32;   -- Size of an instruction
-    constant LS_INSTR_SECTION_SIZE : NATURAL := 10; -- 10 bits (1024 instructions max in LS (in code section))
+    constant LS_INSTR_SECTION_SIZE : NATURAL := 12; -- 12 bits (2048 instructions max in LS (in code section))
 
     ----- ISA CONSTANTS -----
     constant OPCODE_WIDTH_4_COUNT  : NATURAL := 4;  -- 4 bit-width Opcodes Count

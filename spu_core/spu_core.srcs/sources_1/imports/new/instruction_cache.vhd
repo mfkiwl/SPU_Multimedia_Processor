@@ -6,7 +6,7 @@
 -- Design Name: Instruction Cache
 -- Tool versions: Vivado v2018.3 (64-bit)
 -- Description:
---     128-Byte DMA Cache.
+--     128-Byte Direct-mapped Cache.
 --     Holds, at most, 32 Instructions of the current program 
 --     executing on the CPU.
 ------------------------------------------------------------------------------
@@ -52,13 +52,12 @@ begin
             DATA_OUT <= (others => '0'); -- Clear first
             DATA_OUT((INSTR_PAIR_SIZE-1) downto 53) <= "01000000001"; -- Send Odd NOP
             DATA_OUT((INSTR_SIZE-1) downto 21) <= "00000000001"; -- Send Even NOP
-            -- Prevent WAW hazard NOPs --
         ----- Fill Instruction Cache with next set of instructions -----
         elsif(WRITE_CACHE = '1') then
             INSTR_ADDR := ADDR;
             for i in 0 to (CACHE_HEIGHT-1) loop
                 INSTR_ADDR := INSTR_ADDR + 1;
-                CACHE(i).TAG <= INSTR_ADDR((LS_INSTR_SECTION_SIZE - 1) downto 7); -- TAG = MS 5 bit of Instr address
+                CACHE(i).TAG <= INSTR_ADDR((LS_INSTR_SECTION_SIZE - 1) downto 8); -- TAG = MS 4 bit of Instr address
                 CACHE(i).DATA(INSTR_i1 downto INSTR_i2) <= INSTR_BLOCK(INSTR_BLOCK_i1 downto INSTR_BLOCK_i2); -- 1st instruction in current block
                 CACHE(i).DATA((INSTR_i1+32) downto (INSTR_i2+32)) <= INSTR_BLOCK((INSTR_BLOCK_i1+32) downto (INSTR_BLOCK_i2+32)); -- 2nd instruction in current block
                 CACHE(i).V <= '1';

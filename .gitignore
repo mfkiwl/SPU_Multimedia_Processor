@@ -1,12 +1,10 @@
 ### Ignore Word Document temp files ###
 ~$Report.doc
-
+~$Report.docx
 ####################### Visual Studio Code ####################
 .vscode/*
-
 # Ignore all local history of files
 .history
-
 ####################### Xilinx Vivado ####################
 ############
 #Exclude all

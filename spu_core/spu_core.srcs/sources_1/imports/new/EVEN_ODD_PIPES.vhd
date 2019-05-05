@@ -35,7 +35,8 @@ use work.CONSTANTS_PACKAGE.ALL;
 entity even_odd_pipes is
     port (
         -------------------- INPUTS --------------------
-        CLK               : in STD_LOGIC; -- System Wide Synchronous 
+        CLK               : in STD_LOGIC; -- System Wide Synchronous
+        PC_IN             : in STD_LOGIC_VECTOR((LS_INSTR_SECTION_SIZE - 1) downto 0); 
         EVEN_RI7_EOP      : in STD_LOGIC_VECTOR((RI7_WIDTH-1) downto 0);     -- Even Immediate RI7
         EVEN_RI10_EOP     : in STD_LOGIC_VECTOR((RI10_WIDTH-1) downto 0);    -- Even Immediate RI10
         EVEN_RI16_EOP     : in STD_LOGIC_VECTOR((RI16_WIDTH-1) downto 0);    -- Even Immediate RI16
@@ -54,15 +55,15 @@ entity even_odd_pipes is
         EVEN_OPCODE_EOP   : in STD_LOGIC_VECTOR((OPCODE_WIDTH-1) downto 0);  -- Even Instruction Opcode
         ODD_OPCODE_EOP    : in STD_LOGIC_VECTOR((OPCODE_WIDTH-1) downto 0);  -- Odd Instruction Opcode
         LOCAL_STORE_DATA_EOP : in STD_LOGIC_VECTOR((DATA_WIDTH-1) downto 0); -- Data from Local Store
+        INSTR_BLOCK_DATA     : in STD_LOGIC_VECTOR((INSTR_WIDTH_LS-1) downto 0); -- 128-bytes (32 Instructions) from Local Store
         -------------------- OUTPUTS --------------------
-        PC_BRNCH                   : out STD_LOGIC_VECTOR((LS_INSTR_SECTION_SIZE - 1) downto 0); -- Next value of the PC when branching
-        BRANCH_FLUSH               : out STD_LOGIC := '0'; -- Flush Flag when Branch mispredict
+        PC_OUT                     : out STD_LOGIC_VECTOR((LS_INSTR_SECTION_SIZE - 1) downto 0) := (others => '0');
         LS_WE_OUT_EOP              : out STD_LOGIC := '0'; -- Local Store Write Enable Control Signal
         LS_RIB_OUT_EOP             : out STD_LOGIC := '0'; -- Local Store Read Instruction Block Signal
         LS_DATA_OUT_EOP            : out STD_LOGIC_VECTOR((DATA_WIDTH-1) downto 0)    := (others => '0');  -- Data to write into LS
         LS_ADDR_OUT_EOP            : out STD_LOGIC_VECTOR((ADDR_WIDTH_LS-1) downto 0) := (others => '0');  -- Local Store Address
         RESULT_PACKET_EVEN_OUT_EOP : out RESULT_PACKET_EVEN := ((others => '0'), (others => '0'), '0', 0); -- Result Packet from Even Execution Units 
-        RESULT_PACKET_ODD_OUT_EOP  : out RESULT_PACKET_ODD  := ((others => '0'), (others => '0'), '0', 0)  -- Result Packet from Odd Execution Units
+        RESULT_PACKET_ODD_OUT_EOP  : out RESULT_PACKET_ODD  := ((others => '0'), (others => '0'), '0', 0, '0', (others => '0'), (others => '0'), '0') -- Result Packet from Odd Execution Units
     );
 end even_odd_pipes;
 
@@ -70,7 +71,7 @@ end even_odd_pipes;
 architecture behavioral of even_odd_pipes is
 ----- INSTRUCTION RESULTS -----
 signal RESULT_EVEN : RESULT_PACKET_EVEN := ((others => '0'), (others => '0'), '0', 0);
-signal RESULT_ODD  : RESULT_PACKET_ODD  := ((others => '0'), (others => '0'), '0', 0);
+signal RESULT_ODD  : RESULT_PACKET_ODD  := ((others => '0'), (others => '0'), '0', 0, '0', (others => '0'), (others => '0'), '0');
 constant EXT_WIDTH : NATURAL := 32; -- Length of Extended Immediates
 begin
     ----- OUTPUT EVEN PIPE RESULTS -----
@@ -78,128 +79,128 @@ begin
     
     -------------------- EVEN PIPE PROCESS --------------------
     EVEN_PIPE_PROC : process (CLK) is
-    begin
-            ----- RESET FLUSH SIGNAL -----
-            if(rising_edge(CLK)) then
-                BRANCH_FLUSH <= '0';
-            end if;
+    begin           
+        ----- Reset Signals -----
+        if(rising_edge(CLK)) then
+            RESULT_EVEN <= ((others => '0'), (others => '0'), '0', 0);
+        end if;
+        
+        case(EVEN_OPCODE_EOP) is
+            -------------------- SIMPLE FIXED 1 --------------------
+            when "00011000000" => -- Add Word
+                RESULT_EVEN.RESULT(31 downto 0)   <= STD_LOGIC_VECTOR(SIGNED(RA_EVEN_DATA_EOP(31 downto 0)) + SIGNED(RB_EVEN_DATA_EOP(31 downto 0)));                    
+                RESULT_EVEN.RESULT(63 downto 32)  <= STD_LOGIC_VECTOR(SIGNED(RA_EVEN_DATA_EOP(63 downto 32)) + SIGNED(RB_EVEN_DATA_EOP(63 downto 32)));                    
+                RESULT_EVEN.RESULT(95 downto 64)  <= STD_LOGIC_VECTOR(SIGNED(RA_EVEN_DATA_EOP(95 downto 64)) + SIGNED(RB_EVEN_DATA_EOP(95 downto 64)));                    
+                RESULT_EVEN.RESULT(127 downto 96) <= STD_LOGIC_VECTOR(SIGNED(RA_EVEN_DATA_EOP(127 downto 96)) + SIGNED(RB_EVEN_DATA_EOP(127 downto 96)));  
+                RESULT_EVEN.REG_DEST              <= EVEN_REG_DEST_EOP;
+                RESULT_EVEN.RW                    <= '1'; 
+                RESULT_EVEN.LATENCY               <= SIMPLE_FIXED_1_L; 
+            when "---00011100" => -- Add Word Immediate
+                RESULT_EVEN.RESULT(31 downto 0)   <= STD_LOGIC_VECTOR(SIGNED(RA_EVEN_DATA_EOP(31 downto 0)) + resize(SIGNED(EVEN_RI10_EOP), EXT_WIDTH)); 
+                RESULT_EVEN.RESULT(63 downto 32)  <= STD_LOGIC_VECTOR(SIGNED(RA_EVEN_DATA_EOP(63 downto 32)) + resize(SIGNED(EVEN_RI10_EOP), EXT_WIDTH));                    
+                RESULT_EVEN.RESULT(95 downto 64)  <= STD_LOGIC_VECTOR(SIGNED(RA_EVEN_DATA_EOP(95 downto 64)) + resize(SIGNED(EVEN_RI10_EOP), EXT_WIDTH));                    
+                RESULT_EVEN.RESULT(127 downto 96) <= STD_LOGIC_VECTOR(SIGNED(RA_EVEN_DATA_EOP(127 downto 96)) + resize(SIGNED(EVEN_RI10_EOP), EXT_WIDTH));                                       
+                RESULT_EVEN.REG_DEST              <= EVEN_REG_DEST_EOP;
+                RESULT_EVEN.RW                    <= '1'; 
+                RESULT_EVEN.LATENCY               <= SIMPLE_FIXED_1_L; 
+            when "00001000000" => -- Subtract from Word
             
-            case EVEN_OPCODE_EOP is
-                -------------------- SIMPLE FIXED 1 --------------------
-                when "00011000000" => -- Add Word
-                    RESULT_EVEN.RESULT(31 downto 0)   <= STD_LOGIC_VECTOR(SIGNED(RA_EVEN_DATA_EOP(31 downto 0)) + SIGNED(RB_EVEN_DATA_EOP(31 downto 0)));                    
-                    RESULT_EVEN.RESULT(63 downto 32)  <= STD_LOGIC_VECTOR(SIGNED(RA_EVEN_DATA_EOP(63 downto 32)) + SIGNED(RB_EVEN_DATA_EOP(63 downto 32)));                    
-                    RESULT_EVEN.RESULT(95 downto 64)  <= STD_LOGIC_VECTOR(SIGNED(RA_EVEN_DATA_EOP(95 downto 64)) + SIGNED(RB_EVEN_DATA_EOP(95 downto 64)));                    
-                    RESULT_EVEN.RESULT(127 downto 96) <= STD_LOGIC_VECTOR(SIGNED(RA_EVEN_DATA_EOP(127 downto 96)) + SIGNED(RB_EVEN_DATA_EOP(127 downto 96)));  
-                    RESULT_EVEN.REG_DEST              <= EVEN_REG_DEST_EOP;
-                    RESULT_EVEN.RW                    <= '1'; 
-                    RESULT_EVEN.LATENCY               <= SIMPLE_FIXED_1_L; 
-                when "---00011100" => -- Add Word Immediate
-                    RESULT_EVEN.RESULT(31 downto 0)   <= STD_LOGIC_VECTOR(SIGNED(RA_EVEN_DATA_EOP(31 downto 0)) + resize(SIGNED(EVEN_RI10_EOP), EXT_WIDTH)); 
-                    RESULT_EVEN.RESULT(63 downto 32)  <= STD_LOGIC_VECTOR(SIGNED(RA_EVEN_DATA_EOP(63 downto 32)) + resize(SIGNED(EVEN_RI10_EOP), EXT_WIDTH));                    
-                    RESULT_EVEN.RESULT(95 downto 64)  <= STD_LOGIC_VECTOR(SIGNED(RA_EVEN_DATA_EOP(95 downto 64)) + resize(SIGNED(EVEN_RI10_EOP), EXT_WIDTH));                    
-                    RESULT_EVEN.RESULT(127 downto 96) <= STD_LOGIC_VECTOR(SIGNED(RA_EVEN_DATA_EOP(127 downto 96)) + resize(SIGNED(EVEN_RI10_EOP), EXT_WIDTH));                                       
-                    RESULT_EVEN.REG_DEST              <= EVEN_REG_DEST_EOP;
-                    RESULT_EVEN.RW                    <= '1'; 
-                    RESULT_EVEN.LATENCY               <= SIMPLE_FIXED_1_L; 
-                when "00001000000" => -- Subtract from Word
+            when "---00001100" => -- Subtract from Word Immediate
+            
+            when "01010100101" => -- Count Leading Zeros
+            
+            when "00011000001" => -- AND
+            
+            when "01011000001" => -- AND with Complement
+            
+            when "---00010100" => -- AND Word Immediate
                 
-                when "---00001100" => -- Subtract from Word Immediate
+            when "00001000001" => -- OR
+            
+            when "01011001001" => -- OR with Complement
+            
+            when "---00000100" => -- OR Word Immediate
+            
+            when "00111110000" => -- OR Across
+            
+            when "01001000001" => -- Exclusive OR
+            
+            when "00011001001" => -- NAND
+            
+            when "00001001001" => -- NOR
+            
+            when "01111000000" => -- Compare Equal Word
+            
+            when "---01111100" => -- Compare Equal Word Immediate
+            
+            when "01001000000" => -- Compare Greater Than Word
+            
+            when "---01001100" => -- Compare Greater Than Word Immediate
+            
+            when "01011000000" => -- Compare Logical Greater Than Word
+            
+            when "---01011100" => -- Compare Logical Greater Than Word Immediate
+            
+            -------------------- SIMPLE FIXED 2 --------------------
+            when "00001111011" => -- Shift Left Word Immediate
+            
+            when "00001111100" => -- Rotate Halfword Immediate
                 
-                when "01010100101" => -- Count Leading Zeros
+            when "00001111000" => -- Rotate Word Immediate
+            
+            -------------------- FLOATING POINT INSTRUCTIONS --------------------
+            when "01011000100" => -- Floating Add
+            
+            when "01011000101" => -- Floating Subtract
+            
+            when "01011000110" => -- Floating Multiply
+            
+            when "-------1110" => -- Floating Multiply and Add
+            
+            when "-------1101" => -- Floating Negative Multiply and Subtract
+            
+            when "-------1111" => -- Floating Multiply and Subtract
+            
+            when "01111000010" => -- Floating Compare Equal
+            
+            when "01111001010" => -- Floating Compare Magnitude Equal
+            
+            when "01011000010" => -- Floating Compare Greater Than
+            
+            when "01011001010" => -- Floating Compare Magnitude Greater Than
+            
+            -------------------- FLOATING POINT INTEGER INSTRUCTIONS --------------------
+            when "01111000100" => -- Multiply
+            
+            when "01111001100" => -- Multiply Unsigned
+            
+            when "---01110100" => -- Multiply Immediate
+            
+            when "---01110101" => -- Multiply Unsigned Immediate
+            
+            when "-------1100" => -- Multiply and Add
                 
-                when "00011000001" => -- AND
-                
-                when "01011000001" => -- AND with Complement
-                
-                when "---00010100" => -- AND Word Immediate
-                    
-                when "00001000001" => -- OR
-                
-                when "01011001001" => -- OR with Complement
-                
-                when "---00000100" => -- OR Word Immediate
-                
-                when "00111110000" => -- OR Across
-                
-                when "01001000001" => -- Exclusive OR
-                
-                when "00011001001" => -- NAND
-                
-                when "00001001001" => -- NOR
-                
-                when "01111000000" => -- Compare Equal Word
-                
-                when "---01111100" => -- Compare Equal Word Immediate
-                
-                when "01001000000" => -- Compare Greater Than Word
-                
-                when "---01001100" => -- Compare Greater Than Word Immediate
-                
-                when "01011000000" => -- Compare Logical Greater Than Word
-                
-                when "---01011100" => -- Compare Logical Greater Than Word Immediate
-                
-                -------------------- SIMPLE FIXED 2 --------------------
-                when "00001111011" => -- Shift Left Word Immediate
-                
-                when "00001111100" => -- Rotate Halfword Immediate
-                    
-                when "00001111000" => -- Rotate Word Immediate
-                
-                -------------------- FLOATING POINT INSTRUCTIONS --------------------
-                when "01011000100" => -- Floating Add
-                
-                when "01011000101" => -- Floating Subtract
-                
-                when "01011000110" => -- Floating Multiply
-                
-                when "-------1110" => -- Floating Multiply and Add
-                
-                when "-------1101" => -- Floating Negative Multiply and Subtract
-                
-                when "-------1111" => -- Floating Multiply and Subtract
-                
-                when "01111000010" => -- Floating Compare Equal
-                
-                when "01111001010" => -- Floating Compare Magnitude Equal
-                
-                when "01011000010" => -- Floating Compare Greater Than
-                
-                when "01011001010" => -- Floating Compare Magnitude Greater Than
-                
-                -------------------- FLOATING POINT INTEGER INSTRUCTIONS --------------------
-                when "01111000100" => -- Multiply
-                
-                when "01111001100" => -- Multiply Unsigned
-                
-                when "---01110100" => -- Multiply Immediate
-                
-                when "---01110101" => -- Multiply Unsigned Immediate
-                
-                when "-------1100" => -- Multiply and Add
-                    
-                when "01111000101" => -- Multiply High
-                
-                when "01111001110" => -- Multiply High High Unsigned
-                
-                -------------------- BYTE INSTRUCTIONS --------------------
-                when "01010110100" => -- Count Ones in Bytes
-                
-                when "00011010011" => -- Average Bytes
-                
-                when "00001010011" => -- Absolute Differences of Bytes
-                
-                when "01001010011" => -- Sum Bytes into Halfwords
-                
-                when "00000000001" => -- NOP (Load)
-                    RESULT_EVEN.RESULT   <= STD_LOGIC_VECTOR(to_unsigned(0, DATA_WIDTH));
-                    RESULT_EVEN.REG_DEST <= STD_LOGIC_VECTOR(to_unsigned(0, ADDR_WIDTH));
-                    RESULT_EVEN.RW       <= '0'; 
-                    RESULT_EVEN.LATENCY  <= NOP_L;
-                when others =>
-                    -- Do nothing
-            end case;
+            when "01111000101" => -- Multiply High
+            
+            when "01111001110" => -- Multiply High High Unsigned
+            
+            -------------------- BYTE INSTRUCTIONS --------------------
+            when "01010110100" => -- Count Ones in Bytes
+            
+            when "00011010011" => -- Average Bytes
+            
+            when "00001010011" => -- Absolute Differences of Bytes
+            
+            when "01001010011" => -- Sum Bytes into Halfwords
+            
+            when "00000000001" => -- NOP (Load)
+                RESULT_EVEN.RESULT   <= (others => '-');
+                RESULT_EVEN.REG_DEST <= (others => '-'); -- Prevents interference with dependency checks
+                RESULT_EVEN.RW       <= '0'; 
+                RESULT_EVEN.LATENCY  <= NOP_L;
+            when others =>
+                -- Do nothing
+        end case;
     end process EVEN_PIPE_PROC;
     
     ----- OUTPUT EVEN PIPE RESULTS -----
@@ -208,9 +209,19 @@ begin
     -------------------- ODD PIPE PROCESS --------------------
     ODD_PIPE_PROC : process (CLK) is
     begin
+        ----- Reset Signals -----
+        if(rising_edge(CLK)) then
+            PC_OUT          <= (others => '0');
+            LS_WE_OUT_EOP   <= '0';
+            LS_RIB_OUT_EOP  <= '0';
+            LS_DATA_OUT_EOP <= (others => '0');
+            LS_ADDR_OUT_EOP <= (others => '0');
+            RESULT_ODD <= ((others => '0'), (others => '0'), '0', 0, '0', (others => '0'), (others => '0'), '0');
+        end if;
+        
         case ODD_OPCODE_EOP is
             -------------------- LOCAL STORE INSTRUCTIONS --------------------
-            when "--001100001" => -- Load Quadword (a-form)
+            when "--001100001" => -- Load Quadword (a-form) 
                 LS_ADDR_OUT_EOP     <= STD_LOGIC_VECTOR(resize(UNSIGNED(ODD_RI16_EOP), ADDR_WIDTH_LS));
                 RESULT_ODD.RESULT   <= LOCAL_STORE_DATA_EOP; 
                 RESULT_ODD.REG_DEST <= ODD_REG_DEST_EOP; 
@@ -223,7 +234,11 @@ begin
             when "--001000001" => -- Store Quadword (a-form)
             
             when "00000100011" => -- Read Instruction Block
-            
+                PC_OUT                 <= PC_IN;
+                LS_RIB_OUT_EOP         <= '1';
+                RESULT_ODD.REG_DEST    <= (others => '-');
+                RESULT_ODD.INSTR_BLOCK <= INSTR_BLOCK_DATA;
+                RESULT_ODD.WRITE_CACHE <= '1';
             when "--010000010" => -- Immediate Load Half Word Upper
             
             when "--010000001" => -- Immediate Load Word
@@ -257,8 +272,8 @@ begin
             when "00100101001" => -- Branch Indirect If Not Zero
             
             when "01000000001" => -- NOP (Execute)
-                RESULT_ODD.RESULT   <= STD_LOGIC_VECTOR(to_unsigned(0, DATA_WIDTH));
-                RESULT_ODD.REG_DEST <= STD_LOGIC_VECTOR(to_unsigned(0, ADDR_WIDTH)); 
+                RESULT_ODD.RESULT   <= (others => '-');
+                RESULT_ODD.REG_DEST <= (others => '-');
                 RESULT_ODD.RW       <= '0'; 
                 RESULT_ODD.LATENCY  <= NOP_L;
             when others =>

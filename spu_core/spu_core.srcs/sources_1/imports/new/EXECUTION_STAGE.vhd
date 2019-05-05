@@ -11,12 +11,14 @@ library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use work.COMPONENTS_PACKAGE.ALL; 
 use work.CONSTANTS_PACKAGE.ALL;
+use work.SPU_CORE_ISA_PACKAGE.ALL;
 
 -------------------- ENTITY DEFINITION --------------------
 entity EXECUTION_STAGE is
 port (
     -------------------- INPUTS --------------------
     CLK : in STD_LOGIC;
+    PC_IN             : in STD_LOGIC_VECTOR((LS_INSTR_SECTION_SIZE - 1) downto 0);
     EVEN_OPCODE_EXE   : in STD_LOGIC_VECTOR((OPCODE_WIDTH-1) downto 0);
     ODD_OPCODE_EXE    : in STD_LOGIC_VECTOR((OPCODE_WIDTH-1) downto 0);
     RA_EVEN_DATA_EXE  : in STD_LOGIC_VECTOR((DATA_WIDTH-1) downto 0);
@@ -41,11 +43,15 @@ port (
     EVEN_REG_DEST_EXE : in STD_LOGIC_VECTOR((ADDR_WIDTH-1) downto 0);
     ODD_REG_DEST_EXE  : in STD_LOGIC_VECTOR((ADDR_WIDTH-1) downto 0);
     LS_DATA_IN        : in STD_LOGIC_VECTOR((DATA_WIDTH-1) downto 0); 
+    INSTR_BLOCK_DATA  : in STD_LOGIC_VECTOR((INSTR_WIDTH_LS-1) downto 0); -- 128-bytes (32 Instructions) from Local Store
     -------------------- OUTPUTS --------------------
-    PC_BRNCH                  : out STD_LOGIC_VECTOR((LS_INSTR_SECTION_SIZE - 1) downto 0); -- Next value of the PC when branching
-    BRANCH_FLUSH              : out STD_LOGIC;
+    INSTR_BLOCK               : out STD_LOGIC_VECTOR((INSTR_WIDTH_LS-1) downto 0) := (others => '0'); -- 128-bytes (32 Instructions) from Local Store
+    WRITE_CACHE               : out STD_LOGIC := '0'; -- Cache write enable
+    PC_OUT_EXE                : out STD_LOGIC_VECTOR((LS_INSTR_SECTION_SIZE - 1) downto 0) := (others => '0'); -- Current PC value to be used by Local Store when RIB
+    PC_BRNCH                  : out STD_LOGIC_VECTOR((LS_INSTR_SECTION_SIZE - 1) downto 0) := (others => '0'); -- Next value of the PC when branching
+    BRANCH_FLUSH              : out STD_LOGIC := '0';
     RESULT_PACKET_EVEN_OUT_FC : out RESULT_PACKET_EVEN := ((others => '0'), (others => '0'), '0', 0);
-    RESULT_PACKET_ODD_OUT_FC  : out RESULT_PACKET_ODD  := ((others => '0'), (others => '0'), '0', 0);
+    RESULT_PACKET_ODD_OUT_FC  : out RESULT_PACKET_ODD  := ((others => '0'), (others => '0'), '0', 0, '0', (others => '0'), (others => '0'), '0');
     LS_WE_OUT_EOP             : out STD_LOGIC := '0';
     LS_RIB_OUT_EOP            : out STD_LOGIC := '0';
     LS_DATA_OUT_EOP           : out STD_LOGIC_VECTOR((DATA_WIDTH-1) downto 0)    := (others => '0');
@@ -107,6 +113,10 @@ begin
         RESULT_PACKET_EVEN_FC => RESULT_PACKET_EVEN_OUT_EOP,
         RESULT_PACKET_ODD_FC  => RESULT_PACKET_ODD_OUT_EOP,
         ----- OUTPUTS -----
+        INSTR_BLOCK               => INSTR_BLOCK,
+        WRITE_CACHE               => WRITE_CACHE,
+        PC_BRNCH                  => PC_BRNCH,
+        BRANCH_FLUSH              => BRANCH_FLUSH,
         RA_EVEN_DATA_OUT_FM       => RA_EVEN_DATA_OUT_FM,
         RB_EVEN_DATA_OUT_FM       => RB_EVEN_DATA_OUT_FM,
         RC_EVEN_DATA_OUT_FM       => RC_EVEN_DATA_OUT_FM,
@@ -131,7 +141,8 @@ begin
     -------------------- INSTANTIATE EVEN & ODD PIPES --------------------
     eop : even_odd_pipes port map (
         ----- INPUTS -----
-        CLK => CLK,
+        CLK                  => CLK,
+        PC_IN                => PC_IN,
         EVEN_RI7_EOP         => EVEN_RI7_OUT_FM, 
         EVEN_RI10_EOP        => EVEN_RI10_OUT_FM,   
         EVEN_RI16_EOP        => EVEN_RI16_OUT_FM, 
@@ -150,9 +161,9 @@ begin
         EVEN_OPCODE_EOP      => EVEN_OPCODE_OUT_FM,
         ODD_OPCODE_EOP       => ODD_OPCODE_OUT_FM,
         LOCAL_STORE_DATA_EOP => LS_DATA_IN,
+        INSTR_BLOCK_DATA     => INSTR_BLOCK_DATA,
         -------------------- OUTPUTS --------------------
-        PC_BRNCH                   => PC_BRNCH,
-        BRANCH_FLUSH               => BRANCH_FLUSH,
+        PC_OUT                     => PC_OUT_EXE,
         LS_WE_OUT_EOP              => LS_WE_OUT_EOP,
         LS_RIB_OUT_EOP             => LS_RIB_OUT_EOP,
         LS_DATA_OUT_EOP            => LS_DATA_OUT_EOP,
